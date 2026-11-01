@@ -5,6 +5,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const ROLES = ["user", "admin", "scanner", "ctrl_member"];
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -36,7 +38,7 @@ Deno.serve(async (req) => {
       if (!name || !email || !phoneNumber || !password) {
         return json({ message: "Missing required fields" }, 400);
       }
-      if (!["user", "admin", "scanner"].includes(role)) {
+      if (!ROLES.includes(role)) {
         return json({ message: "Invalid user role" }, 400);
       }
 
@@ -57,6 +59,14 @@ Deno.serve(async (req) => {
         throw roleError;
       }
       return json({ message: "User created successfully" }, 201);
+    }
+
+    if (body.action === "set-role") {
+      if (body.userId === user.id) return json({ message: "You cannot change your own role" }, 400);
+      if (!ROLES.includes(body.role)) return json({ message: "Invalid user role" }, 400);
+      const { error } = await admin.from("profiles").update({ role: body.role }).eq("id", body.userId);
+      if (error) return json({ message: error.message }, 400);
+      return json({ message: "Role updated successfully" });
     }
 
     if (body.action === "delete") {

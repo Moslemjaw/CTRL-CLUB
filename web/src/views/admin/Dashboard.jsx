@@ -5,11 +5,17 @@ import { toast } from "react-toastify";
 import DashboardCard from "@/components/atoms/DashboardCard";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
 import { useAuth } from "@/components/AuthProvider";
-import { deleteUser, getAllUsers, getCountUsers } from "@/api/users";
+import { deleteUser, getAllUsers, getCountUsers, setUserRole } from "@/api/users";
 import { getCountEvents } from "@/api/events";
 import { getCountTickets } from "@/api/tickets";
 
 const ITEMS_PER_PAGE = 6;
+const ROLES = [
+  { value: "user", label: "User" },
+  { value: "admin", label: "Admin" },
+  { value: "scanner", label: "Scanner" },
+  { value: "ctrl_member", label: "CTRL Member" },
+];
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -41,6 +47,16 @@ export default function Dashboard() {
       const response = await deleteUser(userId);
       setUsersData((previous) => previous.filter((user) => user.id !== userId));
       setUsersCount((previous) => previous - 1);
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(error.message || "An error occurred");
+    }
+  };
+
+  const handleRoleChange = async (userId, role) => {
+    try {
+      const response = await setUserRole(userId, role);
+      setUsersData((previous) => previous.map((user) => (user.id === userId ? { ...user, role } : user)));
       toast.success(response.message);
     } catch (error) {
       toast.error(error.message || "An error occurred");
@@ -91,7 +107,22 @@ export default function Dashboard() {
                     </td>
                     <td className="px-6 py-4">{user.email}</td>
                     <td className="px-6 py-4">{user.phoneNumber}</td>
-                    <td className="px-6 py-4">{user.role}</td>
+                    <td className="px-6 py-4">
+                      {user.id === userData?.id ? (
+                        ROLES.find((role) => role.value === user.role)?.label
+                      ) : (
+                        <select
+                          aria-label={`Role for ${user.name}`}
+                          value={user.role}
+                          onChange={(event) => handleRoleChange(user.id, event.target.value)}
+                          className="field !min-h-10 !w-40 !py-2 text-sm"
+                        >
+                          {ROLES.map((role) => (
+                            <option key={role.value} value={role.value}>{role.label}</option>
+                          ))}
+                        </select>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       {user.id !== userData?.id && (
                         <button

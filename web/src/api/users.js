@@ -40,6 +40,9 @@ export const addUserByAdmin = ({ name, email, phoneNumber, password, role }) =>
 export const deleteUser = (userId) =>
   invokeFunction("admin-users", { action: "delete", userId });
 
+export const setUserRole = (userId, role) =>
+  invokeFunction("admin-users", { action: "set-role", userId, role });
+
 // Email changes go through Supabase Auth, which syncs the profile once confirmed.
 export async function updateProfile(userId, { name, email }, currentEmail) {
   const { error } = await supabase

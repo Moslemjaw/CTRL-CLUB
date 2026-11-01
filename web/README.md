@@ -17,6 +17,7 @@ npm run dev
 |---|---|
 | `user` | Events, registration, My Tickets |
 | `scanner` | QR scanner |
+| `ctrl_member` | `/workspace` (Tasks, Calendar, Notes) and QR scanner |
 | `admin` | Everything, plus `/admin` |
 
 New sign-ups are always `user`. To create the first admin, sign up, then run this in the Supabase SQL editor:

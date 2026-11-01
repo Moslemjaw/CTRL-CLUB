@@ -36,7 +36,7 @@ const AddUser = () => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
         .required('Confirm password is required'),
-      role: Yup.string().oneOf(['user', 'admin', 'scanner'], 'Invalid user role').required('User role is required'),
+      role: Yup.string().oneOf(['user', 'admin', 'scanner', 'ctrl_member'], 'Invalid user role').required('User role is required'),
       phoneNumber: Yup.string()
         .matches(/^\d+$/, 'Phone number must be digits only')
         .min(10, 'Phone number must be at least 10 digits')
@@ -140,6 +140,7 @@ const AddUser = () => {
             <option value="user">User</option>
             <option value="admin">Admin</option>
             <option value="scanner">Scanner</option>
+            <option value="ctrl_member">CTRL Member</option>
           </select>
           {formik.touched.role && formik.errors.role && (
             <div className="field-error">{formik.errors.role}</div>

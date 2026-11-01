@@ -123,6 +123,8 @@ export default function Hero() {
                   <ButtonComponent text="Sign Up" path="/signUp" />
                   <ButtonComponent text="Log In" path="/logIn" variant="ghost" />
                 </>
+              ) : role === "ctrl_member" ? (
+                <ButtonComponent text="Workspace" path="/workspace" />
               ) : role !== "scanner" ? (
                 <ButtonComponent text="My Tickets" path="/myTickets" />
               ) : (

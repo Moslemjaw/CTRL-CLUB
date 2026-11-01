@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { FaHome, FaTicketAlt } from "react-icons/fa";
 import { IoLogIn, IoLogOut } from "react-icons/io5";
-import { BsQrCodeScan } from "react-icons/bs";
+import { BsKanban, BsQrCodeScan } from "react-icons/bs";
 import { IoMdPersonAdd } from "react-icons/io";
 import { RiAdminFill } from "react-icons/ri";
 import { logOut } from "@/api/auth";
@@ -23,8 +23,9 @@ const SpeedDialComponent = () => {
 
   const links = [{ href: "/", label: "Home", icon: <FaHome /> }];
   if (role === "admin") links.push({ href: "/admin", label: "Admin", icon: <RiAdminFill /> });
-  if (role === "admin" || role === "scanner") links.push({ href: "/qrScanner", label: "QR Scanner", icon: <BsQrCodeScan /> });
-  if (isLoggedIn && role !== "scanner") links.push({ href: "/myTickets", label: "My Tickets", icon: <FaTicketAlt /> });
+  if (role === "admin" || role === "ctrl_member") links.push({ href: "/workspace", label: "Workspace", icon: <BsKanban /> });
+  if (role === "admin" || role === "scanner" || role === "ctrl_member") links.push({ href: "/qrScanner", label: "QR Scanner", icon: <BsQrCodeScan /> });
+  if (isLoggedIn && role !== "scanner" && role !== "ctrl_member") links.push({ href: "/myTickets", label: "My Tickets", icon: <FaTicketAlt /> });
   if (!isLoggedIn) {
     links.push({ href: "/signUp", label: "Sign Up", icon: <IoMdPersonAdd /> });
     links.push({ href: "/logIn", label: "Log In", icon: <IoLogIn /> });
