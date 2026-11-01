@@ -69,7 +69,8 @@ const SignUpForm = () => {
 
   const verificationSchema = Yup.object({
     verificationCode: Yup.string()
-      .length(6, 'Code must be 6 digits')
+      // Supabase's email OTP length is configurable from 6 to 10 digits.
+      .matches(/^\d{6,10}$/, 'Enter the full code from your email')
       .required('Required'),
   });
 
