@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { toast } from "react-toastify";
 import DashboardCard from "@/components/atoms/DashboardCard";
+import PageHeader from "@/components/molecule/PageHeader";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
 import { useAuth } from "@/components/AuthProvider";
 import { deleteUser, getAllUsers, getCountUsers, setUserRole } from "@/api/users";
@@ -16,6 +18,7 @@ const ROLES = [
   { value: "scanner", label: "Scanner" },
   { value: "ctrl_member", label: "CTRL Member" },
 ];
+const USER_COLUMNS = "2md:grid-cols-[minmax(0,1fr)_8.5rem_10.5rem_4.5rem] 2md:gap-4";
 
 export default function Dashboard() {
   const { userData } = useAuth();
@@ -65,87 +68,66 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <PageHeader title={`Welcome, ${userData?.name?.split(" ")[0] ?? ""}`} description={userData?.email}>
+        <Link href="/admin/addEvent" className="btn btn-primary !min-h-11 !py-2">Add Event</Link>
+        <Link href="/admin/addUser" className="btn btn-ghost !min-h-11 !py-2">Add User</Link>
+      </PageHeader>
+
+      <div className="grid grid-cols-3 gap-3 md:gap-4">
         <DashboardCard title="Users" count={usersCount} />
-        <DashboardCard title="All Events" count={eventsCount} />
-        <DashboardCard title="All Tickets" count={ticketsCount} />
+        <DashboardCard title="Events" count={eventsCount} />
+        <DashboardCard title="Tickets" count={ticketsCount} />
       </div>
 
-      <div className="panel">
-        <h2 className="heading mb-5 text-2xl">Admin Data</h2>
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <p className="field-label !mb-1">Name</p>
-            <p className="text-lg text-white">{userData?.name}</p>
-          </div>
-          <div>
-            <p className="field-label !mb-1">Email</p>
-            <p className="text-lg text-white">{userData?.email}</p>
-          </div>
+      <section className="panel" aria-labelledby="users-heading">
+        <h2 id="users-heading" className="heading mb-5 text-2xl">Users</h2>
+        <div className={`hidden border-b border-sky/20 px-3 pb-3 font-mono text-xs uppercase tracking-[0.12em] text-sky 2md:grid ${USER_COLUMNS}`} aria-hidden="true">
+          <span>User</span>
+          <span>Phone Number</span>
+          <span>Role</span>
+          <span />
         </div>
-      </div>
-
-      <div className="panel">
-        <h2 className="heading mb-5 text-2xl">Users</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-white/80">
-            <thead className="border-b border-sky/20 font-mono text-xs uppercase tracking-[0.12em] text-sky">
-              <tr>
-                <th scope="col" className="px-6 py-3">Name</th>
-                <th scope="col" className="px-6 py-3">Email</th>
-                <th scope="col" className="px-6 py-3">Phone Number</th>
-                <th scope="col" className="px-6 py-3">Role</th>
-                <th scope="col" className="px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usersData.length > 0 ? (
-                usersData.map((user) => (
-                  <tr key={user.id} className="border-b border-sky/10 transition-colors hover:bg-white/5">
-                    <td scope="row" className="px-6 py-4 whitespace-nowrap font-medium text-white">
-                      {user.name}
-                    </td>
-                    <td className="px-6 py-4">{user.email}</td>
-                    <td className="px-6 py-4">{user.phoneNumber}</td>
-                    <td className="px-6 py-4">
-                      {user.id === userData?.id ? (
-                        ROLES.find((role) => role.value === user.role)?.label
-                      ) : (
-                        <select
-                          aria-label={`Role for ${user.name}`}
-                          value={user.role}
-                          onChange={(event) => handleRoleChange(user.id, event.target.value)}
-                          className="field !min-h-10 !w-40 !py-2 text-sm"
-                        >
-                          {ROLES.map((role) => (
-                            <option key={role.value} value={role.value}>{role.label}</option>
-                          ))}
-                        </select>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {user.id !== userData?.id && (
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(user.id)}
-                          className="font-medium text-stop hover:underline"
-                        >
-                          Delete User
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-white/60">
-                    No users found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {usersData.length > 0 ? (
+          <ul className="flex flex-col gap-3 2md:gap-0">
+            {usersData.map((user) => (
+              <li key={user.id} className={`grid items-center gap-3 rounded-xl border border-sky/15 p-4 text-sm text-white/80 transition-colors hover:bg-white/5 2md:rounded-none 2md:border-0 2md:border-b 2md:border-sky/10 2md:p-3 ${USER_COLUMNS}`}>
+                <div className="min-w-0">
+                  <p className="break-words font-display text-base font-semibold text-white">{user.name}</p>
+                  <p className="break-all">{user.email}</p>
+                </div>
+                <p className="break-all">{user.phoneNumber}</p>
+                {user.id === userData?.id ? (
+                  <p>{ROLES.find((role) => role.value === user.role)?.label}</p>
+                ) : (
+                  <select
+                    aria-label={`Role for ${user.name}`}
+                    value={user.role}
+                    onChange={(event) => handleRoleChange(user.id, event.target.value)}
+                    className="field !min-h-10 !py-2 text-sm"
+                  >
+                    {ROLES.map((role) => (
+                      <option key={role.value} value={role.value}>{role.label}</option>
+                    ))}
+                  </select>
+                )}
+                <div className="2md:text-right">
+                  {user.id !== userData?.id && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(user.id)}
+                      aria-label={`Delete ${user.name}`}
+                      className="min-h-10 font-medium text-stop hover:underline"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="py-4 text-center text-white/60">No users found.</p>
+        )}
         {usersData.length > 0 && (
           <div className="mx-auto">
             <PaginationRounded
@@ -155,7 +137,7 @@ export default function Dashboard() {
             />
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

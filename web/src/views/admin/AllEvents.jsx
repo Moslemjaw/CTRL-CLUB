@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
 import EventCard from "@/components/molecule/EventCard";
+import PageHeader from "@/components/molecule/PageHeader";
 import FilterKeys from "@/components/molecule/FilterKeys";
 import { deleteEvent, getAllEvents, getCountEvents } from "@/api/events";
 
@@ -50,10 +51,9 @@ export default function AllEvents() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
-        <h1 className="heading text-4xl md:text-5xl">All Events</h1>
+      <PageHeader title="All Events">
         <FilterKeys label="Filter Events" options={FILTERS} value={filter} onChange={handleFilterChange} />
-      </div>
+      </PageHeader>
       <div className="space-y-6">
         {eventsData.map((event) => (
           <EventCard

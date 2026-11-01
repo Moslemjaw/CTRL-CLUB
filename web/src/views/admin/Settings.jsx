@@ -1,14 +1,17 @@
 "use client";
 
 
+import PageHeader from "@/components/molecule/PageHeader";
 import EditProfile from "./EditProfile";
 
 export default function Settings() {
 
   return (
-    <div className="panel">
-      <h1 className="heading mb-6 text-4xl">Settings</h1>
-      <EditProfile />
+    <div>
+      <PageHeader title="Settings" />
+      <div className="panel">
+        <EditProfile />
+      </div>
     </div>
   )
 }

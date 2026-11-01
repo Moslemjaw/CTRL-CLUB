@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { addUserByAdmin } from "@/api/users";
+import PageHeader from "@/components/molecule/PageHeader";
 
 const AddUser = () => {
   const callAddUser = async (userData) => {
@@ -49,11 +50,9 @@ const AddUser = () => {
   });
 
   return (
-    <div className="panel !p-0">
-      <div className='border-b border-sky/15 p-6'>
-        <h1 className='heading text-3xl'>Add User</h1>
-      </div>
-      <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto p-6">
+    <div>
+      <PageHeader title="Add User" />
+      <form onSubmit={formik.handleSubmit} className="panel grid gap-4 2md:grid-cols-2">
         <div>
           <input
             type="text"
@@ -150,7 +149,7 @@ const AddUser = () => {
         <button
           type="submit"
           disabled={formik.isSubmitting}
-          className="btn btn-primary"
+          className="btn btn-primary 2md:col-span-2 2md:justify-self-start"
         >
           {formik.isSubmitting ? 'Submitting...' : 'Submit'}
         </button>

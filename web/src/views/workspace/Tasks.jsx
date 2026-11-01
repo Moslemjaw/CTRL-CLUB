@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { useAuth } from "@/components/AuthProvider";
+import PageHeader from "@/components/molecule/PageHeader";
 import { createTask, deleteTask, getTasks, getTeamMembers, updateTask } from "@/api/workspace";
 
 const COLUMNS = [
@@ -24,6 +25,7 @@ export default function Tasks() {
   const [members, setMembers] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([getTasks(), getTeamMembers()])
@@ -51,6 +53,7 @@ export default function Tasks() {
           setTasks((previous) => [saved, ...previous]);
         }
         setEditingId(null);
+        setFormOpen(false);
         resetForm();
       } catch (error) {
         toast.error(error.message || "Could not save the task.");
@@ -61,6 +64,7 @@ export default function Tasks() {
 
   const startEdit = (task) => {
     setEditingId(task.id);
+    setFormOpen(true);
     formik.setValues({
       title: task.title,
       description: task.description,
@@ -68,10 +72,12 @@ export default function Tasks() {
       dueDate: task.dueDate ?? "",
       assignedTo: task.assignedTo ?? "",
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
+    setFormOpen(false);
     formik.resetForm();
   };
 
@@ -98,44 +104,50 @@ export default function Tasks() {
   const memberName = (id) => members.find((member) => member.id === id)?.name;
 
   return (
-    <div className="space-y-6">
-      <div className="panel">
-        <h1 className="heading mb-5 text-3xl">{editingId ? "Edit Task" : "Tasks"}</h1>
-        <form onSubmit={formik.handleSubmit} className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label htmlFor="task-title" className="field-label">Title</label>
-            <input id="task-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
-            {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
-          </div>
-          <div className="md:col-span-2">
-            <label htmlFor="task-description" className="field-label">Description</label>
-            <textarea id="task-description" name="description" rows={2} value={formik.values.description} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.description && formik.errors.description ? "field-invalid" : ""}`} />
-            {formik.touched.description && formik.errors.description && <div className="field-error">{formik.errors.description}</div>}
-          </div>
-          <div>
-            <label htmlFor="task-due" className="field-label">Due Date</label>
-            <input id="task-due" type="date" name="dueDate" value={formik.values.dueDate} onChange={formik.handleChange} className="field" />
-          </div>
-          <div>
-            <label htmlFor="task-assignee" className="field-label">Assigned To</label>
-            <select id="task-assignee" name="assignedTo" value={formik.values.assignedTo} onChange={formik.handleChange} className="field">
-              <option value="">Nobody</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>{member.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-wrap gap-3 md:col-span-2">
-            <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
-              {formik.isSubmitting ? "Saving..." : editingId ? "Save Task" : "Add Task"}
-            </button>
-            {editingId && <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>}
-          </div>
-        </form>
-      </div>
+    <div>
+      <PageHeader title="Tasks" description="Shared with the whole team.">
+        {!formOpen && <button type="button" onClick={() => setFormOpen(true)} className="btn btn-primary !min-h-11 !py-2">New Task</button>}
+      </PageHeader>
+
+      {formOpen && (
+        <div className="panel mb-6">
+          <h2 className="heading mb-5 text-2xl">{editingId ? "Edit Task" : "New Task"}</h2>
+          <form onSubmit={formik.handleSubmit} className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label htmlFor="task-title" className="field-label">Title</label>
+              <input id="task-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
+              {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="task-description" className="field-label">Description</label>
+              <textarea id="task-description" name="description" rows={2} value={formik.values.description} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.description && formik.errors.description ? "field-invalid" : ""}`} />
+              {formik.touched.description && formik.errors.description && <div className="field-error">{formik.errors.description}</div>}
+            </div>
+            <div>
+              <label htmlFor="task-due" className="field-label">Due Date</label>
+              <input id="task-due" type="date" name="dueDate" value={formik.values.dueDate} onChange={formik.handleChange} className="field" />
+            </div>
+            <div>
+              <label htmlFor="task-assignee" className="field-label">Assigned To</label>
+              <select id="task-assignee" name="assignedTo" value={formik.values.assignedTo} onChange={formik.handleChange} className="field">
+                <option value="">Nobody</option>
+                {members.map((member) => (
+                  <option key={member.id} value={member.id}>{member.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-wrap gap-3 md:col-span-2">
+              <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
+                {formik.isSubmitting ? "Saving..." : editingId ? "Save Task" : "Add Task"}
+              </button>
+              <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {loaded && (
-        <div className="grid gap-4 2md:grid-cols-3">
+        <div className="grid items-start gap-4 2md:grid-cols-3">
           {COLUMNS.map((column) => {
             const columnTasks = tasks.filter((task) => task.status === column.value);
             return (

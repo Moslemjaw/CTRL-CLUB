@@ -7,6 +7,7 @@ import { IoMdCloudUpload } from 'react-icons/io';
 import { useSearchParams } from "next/navigation";
 import { toast } from 'react-toastify';
 import { coverImageUrl, getEventById, updateEvent } from "@/api/events";
+import PageHeader from "@/components/molecule/PageHeader";
 
 // datetime-local inputs expect local time, not UTC.
 const toLocalInput = (value) => {
@@ -77,16 +78,17 @@ const EditEvent = () => {
   };
 
   return (
-    <div className="panel">
-      <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto">
-        <div className="mb-2 border-b border-sky/15 pb-5">
+    <div>
+      <PageHeader title="Edit Event" />
+      <form onSubmit={formik.handleSubmit} className="panel grid gap-4 2md:grid-cols-2">
+        <div className="mb-2 border-b border-sky/15 pb-5 2md:col-span-2">
           <label className="field-label">Event Cover Image</label>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-4">
             {coverImagePreview && (
               <img
                 src={coverImagePreview}
                 alt="Cover Image Preview"
-                className="max-w-96 rounded-lg my-4 object-cover border-2 border-sky"
+                className="max-h-64 w-full max-w-96 rounded-lg object-cover border-2 border-sky"
               />
             )}
             <label
@@ -110,7 +112,7 @@ const EditEvent = () => {
           <p className="text-white/60 mt-2 text-sm">PNG or JPG no bigger than 800px width and height</p>
         </div>
 
-        <div>
+        <div className="2md:col-span-2">
           <input
             type="text"
             name="title"
@@ -155,9 +157,10 @@ const EditEvent = () => {
           ) : null}
         </div>
 
-        <div>
+        <div className="2md:col-span-2">
           <textarea
             name="description"
+            rows={4}
             placeholder="Event Description"
             value={formik.values.description}
             onChange={formik.handleChange}
@@ -213,7 +216,7 @@ const EditEvent = () => {
           ) : null}
         </div>
 
-        <div>
+        <div className="2md:col-span-2">
           <button
             type="submit"
             className="btn btn-primary"

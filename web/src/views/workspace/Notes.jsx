@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { useAuth } from "@/components/AuthProvider";
+import PageHeader from "@/components/molecule/PageHeader";
 import { createNote, deleteNote, getNotes, getTeamMembers, updateNote } from "@/api/workspace";
 
 export default function Notes() {
@@ -13,6 +14,7 @@ export default function Notes() {
   const [members, setMembers] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([getNotes(), getTeamMembers()])
@@ -35,6 +37,7 @@ export default function Notes() {
         const saved = editingId ? await updateNote(editingId, values) : await createNote(values);
         setNotes((previous) => [saved, ...previous.filter((note) => note.id !== saved.id)]);
         setEditingId(null);
+        setFormOpen(false);
         resetForm();
       } catch (error) {
         toast.error(error.message || "Could not save the note.");
@@ -45,11 +48,14 @@ export default function Notes() {
 
   const startEdit = (note) => {
     setEditingId(note.id);
+    setFormOpen(true);
     formik.setValues({ title: note.title, body: note.body });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
+    setFormOpen(false);
     formik.resetForm();
   };
 
@@ -67,31 +73,37 @@ export default function Notes() {
   const memberName = (id) => members.find((member) => member.id === id)?.name;
 
   return (
-    <div className="space-y-6">
-      <div className="panel">
-        <h1 className="heading mb-5 text-3xl">{editingId ? "Edit Note" : "Notes"}</h1>
-        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="note-title" className="field-label">Title</label>
-            <input id="note-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
-            {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
-          </div>
-          <div>
-            <label htmlFor="note-body" className="field-label">Note</label>
-            <textarea id="note-body" name="body" rows={4} value={formik.values.body} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.body && formik.errors.body ? "field-invalid" : ""}`} />
-            {formik.touched.body && formik.errors.body && <div className="field-error">{formik.errors.body}</div>}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
-              {formik.isSubmitting ? "Saving..." : editingId ? "Save Note" : "Add Note"}
-            </button>
-            {editingId && <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>}
-          </div>
-        </form>
-      </div>
+    <div>
+      <PageHeader title="Notes" description="Shared with the whole team.">
+        {!formOpen && <button type="button" onClick={() => setFormOpen(true)} className="btn btn-primary !min-h-11 !py-2">New Note</button>}
+      </PageHeader>
 
-      {loaded && notes.length === 0 && <p className="text-center text-white/60">No notes yet.</p>}
-      <div className="grid gap-4 2md:grid-cols-2">
+      {formOpen && (
+        <div className="panel mb-6">
+          <h2 className="heading mb-5 text-2xl">{editingId ? "Edit Note" : "New Note"}</h2>
+          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="note-title" className="field-label">Title</label>
+              <input id="note-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
+              {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
+            </div>
+            <div>
+              <label htmlFor="note-body" className="field-label">Note</label>
+              <textarea id="note-body" name="body" rows={4} value={formik.values.body} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.body && formik.errors.body ? "field-invalid" : ""}`} />
+              {formik.touched.body && formik.errors.body && <div className="field-error">{formik.errors.body}</div>}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
+                {formik.isSubmitting ? "Saving..." : editingId ? "Save Note" : "Add Note"}
+              </button>
+              <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {loaded && notes.length === 0 && <p className="panel text-center text-white/60">No notes yet.</p>}
+      <div className="grid items-start gap-4 2md:grid-cols-2 xl:grid-cols-3">
         {notes.map((note) => (
           <article key={note.id} className="panel !p-5">
             <h2 className="break-words font-display text-xl font-semibold">{note.title}</h2>

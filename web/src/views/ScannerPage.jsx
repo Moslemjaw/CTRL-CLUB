@@ -1,10 +1,26 @@
 "use client";
 
 import { BsQrCodeScan } from "react-icons/bs";
+import { useAuth } from "@/components/AuthProvider";
+import PageHeader from "@/components/molecule/PageHeader";
 import QrScanner from "@/components/organism/QrScanner";
 import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
+import AdminLayout from "@/views/admin/AdminLayout";
 
 export default function ScannerPage() {
+  const { role } = useAuth();
+
+  if (role === "admin" || role === "ctrl_member") {
+    return (
+      <AdminLayout>
+        <PageHeader title="QR Scanner" description="Choose the event, then scan each ticket." />
+        <div className="mx-auto max-w-xl">
+          <QrScanner />
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <main className="page-bg flex min-h-screen flex-col items-center px-4 py-6 md:py-12">
       <SpeedDialComponent />

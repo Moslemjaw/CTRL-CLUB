@@ -17,9 +17,9 @@ const DashboardCard = ({ title, count }) => {
   }, [count, reduced]);
 
   return (
-    <div className="panel !p-5">
-      <p className="eyebrow">{title}</p>
-      <p className="mt-3 font-display text-5xl font-semibold tabular-nums">{shown.toString().padStart(2, "0")}</p>
+    <div className="panel !p-3 md:!p-5">
+      <p className="eyebrow !tracking-[0.12em] md:!tracking-[0.22em]">{title}</p>
+      <p className="mt-2 font-display text-3xl font-semibold tabular-nums md:mt-3 md:text-5xl">{shown.toString().padStart(2, "0")}</p>
     </div>
   );
 };

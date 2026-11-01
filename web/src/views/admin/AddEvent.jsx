@@ -5,6 +5,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { IoMdCloudUpload } from 'react-icons/io';
 import { createEvent } from "@/api/events";
+import PageHeader from "@/components/molecule/PageHeader";
 import { toast } from 'react-toastify';
 
 const AddEvent = () => {
@@ -65,16 +66,17 @@ const AddEvent = () => {
   };
 
   return (
-    <div className="panel">
-      <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto">
-        <div className="mb-2 border-b border-sky/15 pb-5">
+    <div>
+      <PageHeader title="Add Event" />
+      <form onSubmit={formik.handleSubmit} className="panel grid gap-4 2md:grid-cols-2">
+        <div className="mb-2 border-b border-sky/15 pb-5 2md:col-span-2">
           <label className="field-label">Event Cover Image</label>
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-4">
             {coverImagePreview && (
               <img
                 src={coverImagePreview}
                 alt="Cover Image Preview"
-                className="max-w-96 rounded-lg my-4 object-cover border-2 border-sky"
+                className="max-h-64 w-full max-w-96 rounded-lg object-cover border-2 border-sky"
               />
             )}
             <label
@@ -98,7 +100,7 @@ const AddEvent = () => {
           <p className="text-white/60 mt-2 text-sm">PNG or JPG no bigger than 800px width and height</p>
         </div>
 
-        <div>
+        <div className="2md:col-span-2">
           <input
             type="text"
             name="title"
@@ -142,9 +144,10 @@ const AddEvent = () => {
           ) : null}
         </div>
 
-        <div>
+        <div className="2md:col-span-2">
           <textarea
             name="description"
+            rows={4}
             placeholder="Event Description"
             value={formik.values.description}
             onChange={formik.handleChange}
@@ -186,7 +189,7 @@ const AddEvent = () => {
           ) : null}
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary 2md:col-span-2 2md:justify-self-start">
           Submit
         </button>
       </form>

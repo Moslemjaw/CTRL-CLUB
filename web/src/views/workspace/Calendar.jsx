@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import { useAuth } from "@/components/AuthProvider";
+import PageHeader from "@/components/molecule/PageHeader";
 import { createCalendarEntry, deleteCalendarEntry, getCalendarEntries, getClubEvents, updateCalendarEntry } from "@/api/workspace";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -32,6 +33,7 @@ export default function Calendar() {
   const [entries, setEntries] = useState([]);
   const [clubEvents, setClubEvents] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +88,7 @@ export default function Calendar() {
         setEntries((previous) => [...previous.filter((entry) => entry.id !== saved.id), ...(inMonth ? [saved] : [])]);
         setSelectedDay(dayKey(start));
         setEditingId(null);
+        setFormOpen(false);
         resetForm();
       } catch (error) {
         toast.error(error.message || "Could not save the entry.");
@@ -94,8 +97,14 @@ export default function Calendar() {
     },
   });
 
+  const startNew = () => {
+    setFormOpen(true);
+    formik.setFieldValue("startsAt", `${selectedDay}T09:00`);
+  };
+
   const startEdit = (entry) => {
     setEditingId(entry.id);
+    setFormOpen(true);
     formik.setValues({
       title: entry.title,
       description: entry.description,
@@ -103,10 +112,12 @@ export default function Calendar() {
       startsAt: toLocalInput(entry.startsAt),
       endsAt: toLocalInput(entry.endsAt),
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
+    setFormOpen(false);
     formik.resetForm();
   };
 
@@ -125,42 +136,85 @@ export default function Calendar() {
   const selectedItems = itemsByDay[selectedDay] ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="panel">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h1 className="heading text-3xl">{month.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</h1>
-          <div className="flex gap-2">
-            <button type="button" aria-label="Previous month" onClick={() => changeMonth(-1)} className="btn-icon"><IoChevronBack /></button>
-            <button type="button" aria-label="Next month" onClick={() => changeMonth(1)} className="btn-icon"><IoChevronForward /></button>
+    <div>
+      <PageHeader title="Calendar" description="Team entries and club events.">
+        {!formOpen && <button type="button" onClick={startNew} className="btn btn-primary !min-h-11 !py-2">New Entry</button>}
+      </PageHeader>
+
+      {formOpen && (
+        <section className="panel mb-6" aria-label={editingId ? "Edit entry" : "New entry"}>
+          <h2 className="heading mb-4 text-2xl">{editingId ? "Edit Entry" : "New Entry"}</h2>
+          <form onSubmit={formik.handleSubmit} className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label htmlFor="entry-title" className="field-label">Title</label>
+              <input id="entry-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
+              {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
+            </div>
+            <div>
+              <label htmlFor="entry-start" className="field-label">Starts</label>
+              <input id="entry-start" type="datetime-local" name="startsAt" value={formik.values.startsAt} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.startsAt && formik.errors.startsAt ? "field-invalid" : ""}`} />
+              {formik.touched.startsAt && formik.errors.startsAt && <div className="field-error">{formik.errors.startsAt}</div>}
+            </div>
+            <div>
+              <label htmlFor="entry-end" className="field-label">Ends (optional)</label>
+              <input id="entry-end" type="datetime-local" name="endsAt" value={formik.values.endsAt} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.endsAt && formik.errors.endsAt ? "field-invalid" : ""}`} />
+              {formik.touched.endsAt && formik.errors.endsAt && <div className="field-error">{formik.errors.endsAt}</div>}
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="entry-location" className="field-label">Location</label>
+              <input id="entry-location" name="location" value={formik.values.location} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.location && formik.errors.location ? "field-invalid" : ""}`} />
+              {formik.touched.location && formik.errors.location && <div className="field-error">{formik.errors.location}</div>}
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor="entry-description" className="field-label">Description</label>
+              <textarea id="entry-description" name="description" rows={2} value={formik.values.description} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.description && formik.errors.description ? "field-invalid" : ""}`} />
+              {formik.touched.description && formik.errors.description && <div className="field-error">{formik.errors.description}</div>}
+            </div>
+            <div className="flex flex-wrap gap-3 md:col-span-2">
+              <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
+                {formik.isSubmitting ? "Saving..." : editingId ? "Save Entry" : "Add Entry"}
+              </button>
+              <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>
+            </div>
+          </form>
+        </section>
+      )}
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="panel">
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <h2 className="heading text-2xl md:text-3xl">{month.toLocaleDateString(undefined, { month: "long", year: "numeric" })}</h2>
+            <div className="flex shrink-0 gap-2">
+              <button type="button" aria-label="Previous month" onClick={() => changeMonth(-1)} className="btn-icon"><IoChevronBack /></button>
+              <button type="button" aria-label="Next month" onClick={() => changeMonth(1)} className="btn-icon"><IoChevronForward /></button>
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1 md:gap-2">
+            {WEEKDAYS.map((weekday) => (
+              <div key={weekday} className="pb-1 text-center font-mono text-xs uppercase tracking-[0.12em] text-sky">{weekday}</div>
+            ))}
+            {days.map((date, index) => {
+              if (!date) return <div key={`blank-${index}`} />;
+              const key = dayKey(date);
+              const count = itemsByDay[key]?.length ?? 0;
+              const selected = key === selectedDay;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={selected}
+                  aria-label={`${date.toLocaleDateString(undefined, { day: "numeric", month: "long" })}, ${count} ${count === 1 ? "item" : "items"}`}
+                  onClick={() => setSelectedDay(key)}
+                  className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border font-display font-semibold transition-colors md:min-h-16 ${selected ? "border-white bg-white text-ink" : key === today ? "border-sky text-white hover:bg-white/5" : "border-sky/10 text-white/80 hover:bg-white/5"}`}
+                >
+                  {date.getDate()}
+                  <span className={`h-1.5 w-1.5 rounded-full ${count ? (selected ? "bg-ink" : "bg-sky") : "bg-transparent"}`} aria-hidden="true" />
+                </button>
+              );
+            })}
           </div>
         </div>
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
-          {WEEKDAYS.map((weekday) => (
-            <div key={weekday} className="pb-1 text-center font-mono text-xs uppercase tracking-[0.12em] text-sky">{weekday}</div>
-          ))}
-          {days.map((date, index) => {
-            if (!date) return <div key={`blank-${index}`} />;
-            const key = dayKey(date);
-            const count = itemsByDay[key]?.length ?? 0;
-            const selected = key === selectedDay;
-            return (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={selected}
-                aria-label={`${date.toLocaleDateString(undefined, { day: "numeric", month: "long" })}, ${count} ${count === 1 ? "item" : "items"}`}
-                onClick={() => setSelectedDay(key)}
-                className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border font-display font-semibold transition-colors md:min-h-16 ${selected ? "border-white bg-white text-ink" : key === today ? "border-sky text-white hover:bg-white/5" : "border-sky/10 text-white/80 hover:bg-white/5"}`}
-              >
-                {date.getDate()}
-                <span className={`h-1.5 w-1.5 rounded-full ${count ? (selected ? "bg-ink" : "bg-sky") : "bg-transparent"}`} aria-hidden="true" />
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      <div className="grid gap-6 2md:grid-cols-2">
         <section className="panel" aria-label="Selected day">
           <h2 className="heading mb-4 text-2xl">{new Date(`${selectedDay}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</h2>
           {selectedItems.length === 0 && <p className="text-white/60">Nothing scheduled.</p>}
@@ -182,43 +236,6 @@ export default function Calendar() {
               </article>
             ))}
           </div>
-        </section>
-
-        <section className="panel" aria-label={editingId ? "Edit entry" : "Add entry"}>
-          <h2 className="heading mb-4 text-2xl">{editingId ? "Edit Entry" : "Add Entry"}</h2>
-          <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label htmlFor="entry-title" className="field-label">Title</label>
-              <input id="entry-title" name="title" value={formik.values.title} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.title && formik.errors.title ? "field-invalid" : ""}`} />
-              {formik.touched.title && formik.errors.title && <div className="field-error">{formik.errors.title}</div>}
-            </div>
-            <div>
-              <label htmlFor="entry-start" className="field-label">Starts</label>
-              <input id="entry-start" type="datetime-local" name="startsAt" value={formik.values.startsAt} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.startsAt && formik.errors.startsAt ? "field-invalid" : ""}`} />
-              {formik.touched.startsAt && formik.errors.startsAt && <div className="field-error">{formik.errors.startsAt}</div>}
-            </div>
-            <div>
-              <label htmlFor="entry-end" className="field-label">Ends (optional)</label>
-              <input id="entry-end" type="datetime-local" name="endsAt" value={formik.values.endsAt} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.endsAt && formik.errors.endsAt ? "field-invalid" : ""}`} />
-              {formik.touched.endsAt && formik.errors.endsAt && <div className="field-error">{formik.errors.endsAt}</div>}
-            </div>
-            <div>
-              <label htmlFor="entry-location" className="field-label">Location</label>
-              <input id="entry-location" name="location" value={formik.values.location} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.location && formik.errors.location ? "field-invalid" : ""}`} />
-              {formik.touched.location && formik.errors.location && <div className="field-error">{formik.errors.location}</div>}
-            </div>
-            <div>
-              <label htmlFor="entry-description" className="field-label">Description</label>
-              <textarea id="entry-description" name="description" rows={2} value={formik.values.description} onChange={formik.handleChange} onBlur={formik.handleBlur} className={`field ${formik.touched.description && formik.errors.description ? "field-invalid" : ""}`} />
-              {formik.touched.description && formik.errors.description && <div className="field-error">{formik.errors.description}</div>}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary">
-                {formik.isSubmitting ? "Saving..." : editingId ? "Save Entry" : "Add Entry"}
-              </button>
-              {editingId && <button type="button" onClick={cancelEdit} className="btn btn-ghost">Cancel</button>}
-            </div>
-          </form>
         </section>
       </div>
     </div>
