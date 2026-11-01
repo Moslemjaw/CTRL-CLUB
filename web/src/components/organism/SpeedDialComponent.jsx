@@ -1,142 +1,72 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { PiNavigationArrowFill } from 'react-icons/pi';
-import { FaHome, FaTicketAlt } from 'react-icons/fa';
-import { IoLogIn, IoLogOut } from 'react-icons/io5';
-import { BsQrCodeScan } from 'react-icons/bs';
-import { IoMdPersonAdd } from 'react-icons/io';
+import { useState } from "react";
 import Link from "next/link";
-import { RiAdminFill } from 'react-icons/ri';
+import { AnimatePresence, motion } from "motion/react";
+import { FaHome, FaTicketAlt } from "react-icons/fa";
+import { IoLogIn, IoLogOut } from "react-icons/io5";
+import { BsQrCodeScan } from "react-icons/bs";
+import { IoMdPersonAdd } from "react-icons/io";
+import { RiAdminFill } from "react-icons/ri";
 import { logOut } from "@/api/auth";
 import { useAuth } from "../AuthProvider";
 
+const itemClass = "group relative flex h-[52px] w-[52px] items-center justify-center rounded-2xl border border-sky/40 bg-navy-deep/95 text-xl text-white backdrop-blur transition-colors hover:bg-white hover:text-ink";
+
+function Tip({ children }) {
+  return <span className="pointer-events-none absolute right-[64px] whitespace-nowrap rounded-lg bg-white px-3 py-1.5 font-display text-sm font-semibold text-ink opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{children}</span>;
+}
+
 const SpeedDialComponent = () => {
-  const { isLoggedIn: accessToken, role: userRole } = useAuth();
-  const [dialState, setDialState] = useState(true)
-  const [dialHeight, setDialHeight] = useState('h-[354px]')
+  const { isLoggedIn, role } = useAuth();
+  const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (userRole === 'admin') {
-      setDialHeight('h-[295px]')
-    } else if (accessToken && userRole === 'user') {
-      setDialHeight('h-[177px]')
-    } else {
-      setDialHeight('h-[177px]')
-    }
-
-  }, [accessToken, userRole])
-
-
-  const openDial = () => {
-    setDialState(!dialState)
+  const links = [{ href: "/", label: "Home", icon: <FaHome /> }];
+  if (role === "admin") links.push({ href: "/admin", label: "Admin", icon: <RiAdminFill /> });
+  if (role === "admin" || role === "scanner") links.push({ href: "/qrScanner", label: "QR Scanner", icon: <BsQrCodeScan /> });
+  if (isLoggedIn && role !== "scanner") links.push({ href: "/myTickets", label: "My Tickets", icon: <FaTicketAlt /> });
+  if (!isLoggedIn) {
+    links.push({ href: "/signUp", label: "Sign Up", icon: <IoMdPersonAdd /> });
+    links.push({ href: "/logIn", label: "Log In", icon: <IoLogIn /> });
   }
 
-  const handleLogOut = async () => {
-    await logOut();
-  }
+  const pop = (index) => ({
+    initial: { opacity: 0, y: 20, scale: 0.8 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, y: 20, scale: 0.8 },
+    transition: { type: "spring", stiffness: 500, damping: 28, delay: index * 0.04 },
+  });
+
   return (
-    <div data-dial-init className="fixed end-8 bottom-12 z-[300]">
-      <div id="speed-dial-menu-click" className={`flex flex-col items-center mb-4 space-y-2 overflow-y-hidden  ${!dialState ? `opacity-100 ${dialHeight}` : 'h-0 opacity-0'} transition-all duration-500`}>
-
-        {!accessToken ? (
-          <>
-            <Link
-              href={"/logIn"}
-              className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-            >
-              <IoLogIn className='text-2xl' />
-              <div className="absolute group-hover:visible invisible z-[200] flex left-[-69px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-                Log In
-                <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-              </div>
-            </Link>
-            <Link
-              href={"/signUp"}
-              className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-            >
-              <IoMdPersonAdd className='text-xl' />
-              <div className="absolute group-hover:visible invisible z-[200] flex left-[-80px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-                Sign Up
-                <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-              </div>
-            </Link>
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={handleLogOut}
-            className="flex group justify-center items-center w-[52px] h-[52px] text-gray-50 bg-red-500 hover:bg-gray-100 hover:text-red-500 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-red-400 transition-all duration-300"
-          >
-            <IoLogOut className='text-2xl' />
-            <div className="absolute group-hover:visible invisible z-[200] flex left-[-80px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-              Log Out
-              <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-            </div>
-          </button>
+    <div className="fixed bottom-5 right-4 z-[300] flex flex-col items-end md:bottom-8 md:right-7">
+      <AnimatePresence>
+        {open && (
+          <nav aria-label="Quick actions" className="mb-3 flex flex-col gap-2">
+            {isLoggedIn && (
+              <motion.button key="logout" {...pop(links.length)} type="button" onClick={logOut} aria-label="Log Out" className={`${itemClass} !border-stop/60 text-stop hover:!bg-stop hover:!text-ink`}>
+                <IoLogOut /><Tip>Log Out</Tip>
+              </motion.button>
+            )}
+            {links.map((link, index) => (
+              <motion.div key={link.href} {...pop(links.length - 1 - index)}>
+                <Link href={link.href} aria-label={link.label} onClick={() => setOpen(false)} className={itemClass}>
+                  {link.icon}<Tip>{link.label}</Tip>
+                </Link>
+              </motion.div>
+            ))}
+          </nav>
         )}
-        {(accessToken && userRole !== 'scanner') && (
-          <Link
-            href={"/myTickets"}
-            className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-          >
-            <FaTicketAlt className='text-xl' />
-            <div className="absolute group-hover:visible invisible z-[200] flex left-[-98px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-              My Tickets
-              <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-            </div>
-          </Link>
-        )}
-        {(accessToken && userRole === 'admin' || userRole === 'scanner') &&
-          <Link
-            href={"/qrScanner"}
-            className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-          >
-            <BsQrCodeScan className='text-xl' />
-            <div className="absolute group-hover:visible invisible z-[200] flex left-[-110px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-              QR Scanner
-              <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-            </div>
-          </Link>
-        }
-        {(accessToken && userRole === 'admin') &&
-          <Link
-            href={"/admin"}
-            className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-          >
-            <RiAdminFill className='text-2xl' />
-            <div className="absolute group-hover:visible invisible z-[200] flex left-[-74px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-              Admin
-              <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-            </div>
-          </Link>
-        }
-
-        <Link
-          href={"/"}
-          className="flex group justify-center items-center w-[52px] h-[52px] text-gray-700 bg-gray-100 hover:bg-gray-700 hover:text-gray-100 rounded-full border border-gray-600 shadow-sm focus:ring-4 focus:outline-none focus:ring-gray-400 transition-all duration-300"
-        >
-          <FaHome className='text-2xl' />
-          <div className="absolute group-hover:visible invisible z-[200] flex left-[-69px] w-auto px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 opacity-0 group-hover:opacity-100 bg-gray-900 rounded-lg shadow-sm tooltip dark:bg-gray-700">
-            Home
-            <div className='w-3 h-3 absolute bg-gray-900 rotate-45 -right-1 top-[11px]'></div>
-          </div>
-        </Link>
-        {/* Repeat for other buttons */}
-      </div>
+      </AnimatePresence>
       <button
         type="button"
-        data-dial-toggle="speed-dial-menu-click"
-        data-dial-trigger="click"
-        aria-controls="speed-dial-menu-click"
-        aria-expanded="false"
-        onClick={openDial}
-        className="group flex items-center justify-center border-2 text-white bg-base-color rounded-full w-14 h-14 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800"
+        aria-expanded={open}
+        aria-label="Open actions menu"
+        onClick={() => setOpen(!open)}
+        className="flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-ink bg-white text-ink shadow-[0_5px_0_#6FCBFF] transition-all active:translate-y-[5px] active:shadow-none"
       >
-        <PiNavigationArrowFill className='text-xl group-hover:rotate-45 transition-all duration-300' />
-        <span className="sr-only">Open actions menu</span>
+        <motion.svg animate={{ rotate: open ? 45 : 0 }} viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true"><path d="M10 2v16M2 10h16" /></motion.svg>
       </button>
-    </div >
+    </div>
   );
 };
 

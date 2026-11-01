@@ -1,52 +1,56 @@
 "use client";
 
-
-const user1 = "/images/avatar.jpg";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
+import { motion } from "motion/react";
 import { MdEmojiEvents, MdOutlineAddToPhotos } from "react-icons/md";
 import { IoSettingsSharp } from "react-icons/io5";
-import Footer from "@/components/organism/Footer";
-import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
 import { BiSolidDashboard } from "react-icons/bi";
 import { IoMdPersonAdd } from "react-icons/io";
+import BrandMark from "@/components/brand/BrandMark";
+import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
+import { useAuth } from "@/components/AuthProvider";
+
+const LINKS = [
+  { href: "/admin", label: "Dashboard", icon: <BiSolidDashboard /> },
+  { href: "/admin/addUser", label: "Add User", icon: <IoMdPersonAdd /> },
+  { href: "/admin/allEvents", label: "All Events", icon: <MdEmojiEvents /> },
+  { href: "/admin/addEvent", label: "Add Event", icon: <MdOutlineAddToPhotos /> },
+  { href: "/admin/settings", label: "Settings", icon: <IoSettingsSharp /> },
+];
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { userData } = useAuth();
+  const isActive = (href) => (href === "/admin" ? pathname === href : pathname.startsWith(href));
+
   return (
-    <div className="bg-slate-100 min-h-screen relative">
+    <div className="page-bg min-h-screen">
       <SpeedDialComponent />
-      <div className="max-w-[1300px] mx-auto grid grid-cols-1 lg:gap-0 gap-6 lg:grid-cols-4 py-32  px-5">
-        <div className=" space-y-6">
-          <div className="w-full border pb-4 rounded-md bg-white">
-            <div className="h-28 bg-base-color bg-opacity-90 rounded-t-md flex justify-center items-end">
-            </div>
-            <div className="flex flex-col items-center -mt-16 gap-1">
-              <img src={user1} alt="user image" className="size-32 rounded-full border-4 border-white" />
-              <h1 className="font-semibold text-xl mt-3">{userData?.name}</h1>
-            </div>
-          </div>
-          <div className="w-full border rounded-md p-4 divide-y divide-gray-300 bg-white">
-            <div className="pt-4">
-              <h1 className="text-lg font-semibold">Admin Links</h1>
-              <div className="flex flex-col mt-3 space-y-3 pl-1">
-                <Link href="/admin" className={`flex items-center gap-2 ${pathname === "/admin" ? 'hover:text-gray-500 text-base-color' : 'text-gray-500 hover:text-base-color'} `}><BiSolidDashboard />Dashboard</Link>
-                <Link href="/admin/addUser" className={`flex items-center gap-2 ${pathname === "/admin/addUser" ? 'hover:text-gray-500 text-base-color' : 'text-gray-500 hover:text-base-color'} `}><IoMdPersonAdd />Add User</Link>
-                <Link href="/admin/allEvents" className={`flex items-center gap-2 ${pathname === "/admin/allEvents" || pathname === "/admin/allEvents/editEvent" ? 'hover:text-gray-500 text-base-color' : 'text-gray-500 hover:text-base-color'} `}><MdEmojiEvents />All Events</Link>
-                <Link href="/admin/addEvent" className={`flex items-center gap-2 ${pathname === "/admin/addEvent" ? 'hover:text-gray-500 text-base-color' : 'text-gray-500 hover:text-base-color'} `}><MdOutlineAddToPhotos />Add Event</Link>
-                <Link href="/admin/settings" className={`flex items-center gap-2 ${pathname === "/admin/settings" ? 'hover:text-gray-500 text-base-color' : 'text-gray-500 hover:text-base-color'} `}><IoSettingsSharp />Settings</Link>
+      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-5 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-8 lg:px-6 lg:py-6">
+        <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
+          <div className="flex h-full flex-col gap-5 rounded-2xl border border-sky/15 bg-navy-panel/70 p-4 backdrop-blur">
+            <Link href="/" aria-label="CTRL home"><BrandMark /></Link>
+            <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white font-display text-xl font-bold text-ink shadow-[0_3px_0_#6FCBFF]">{userData?.name?.[0]?.toUpperCase()}</span>
+              <div className="min-w-0">
+                <p className="truncate font-display font-semibold">{userData?.name}</p>
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-sky">Admin</p>
               </div>
             </div>
+            <nav aria-label="Admin Links" className="flex gap-1 overflow-x-auto lg:flex-col">
+              {LINKS.map(({ href, label, icon }) => (
+                <Link key={href} href={href} aria-current={isActive(href) ? "page" : undefined} className={`relative flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 font-display font-semibold transition-colors ${isActive(href) ? "text-ink" : "text-white/75 hover:bg-white/5 hover:text-white"}`}>
+                  {isActive(href) && <motion.span layoutId="admin-active" className="absolute inset-0 rounded-xl bg-white shadow-[0_3px_0_#6FCBFF]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                  <span className="relative text-lg" aria-hidden="true">{icon}</span>
+                  <span className="relative">{label}</span>
+                </Link>
+              ))}
+            </nav>
           </div>
-        </div>
-        {children}
-
-      </div>
-      <div className=" absolute bottom-0 w-full">
-        <Footer />
+        </aside>
+        <main key={pathname} className="page-enter min-w-0 pb-20">{children}</main>
       </div>
     </div>
-  )
+  );
 }

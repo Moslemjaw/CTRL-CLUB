@@ -30,11 +30,11 @@ const EditProfile = () => {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit} className="p-6 mx-auto bg-white rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+    <form onSubmit={formik.handleSubmit} className="max-w-xl">
+      <h2 className="heading mb-5 text-2xl">Edit Profile</h2>
 
       <div className="mb-4">
-        <label htmlFor="name" className="block text-gray-700">User Name</label>
+        <label htmlFor="name" className="field-label">User Name</label>
         <input
           id="name"
           name="name"
@@ -42,12 +42,12 @@ const EditProfile = () => {
           required
           onChange={formik.handleChange}
           value={formik.values.name}
-          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+          className="field"
         />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="email" className="block text-gray-700">Email</label>
+        <label htmlFor="email" className="field-label">Email</label>
         <input
           id="email"
           name="email"
@@ -55,11 +55,11 @@ const EditProfile = () => {
           required
           onChange={formik.handleChange}
           value={formik.values.email}
-          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+          className="field"
         />
       </div>
 
-      <button type="submit" className="bg-base-color hover:bg-second-color text-white py-2 px-4 rounded-md transition-all duration-300">
+      <button type="submit" className="btn btn-primary">
         Update Profile
       </button>
     </form>

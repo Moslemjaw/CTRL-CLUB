@@ -1,47 +1,71 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import QRCode from "qrcode";
 
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  const options = {
+  return new Date(dateString).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
     hour12: true,
-  };
-  return date.toLocaleDateString("en-US", options);
+  });
 }
 
 function TicketCard({ qrId, eventId, title, date, status, location }) {
+  const reduced = useReducedMotion();
   const [qrImage, setQrImage] = useState("");
+  const rotateX = useSpring(useMotionValue(0), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useMotionValue(0), { stiffness: 200, damping: 20 });
+  const used = status === "used";
 
   // Same QR content as the emailed ticket.
   useEffect(() => {
-    QRCode.toDataURL(`Text: ${qrId}\nEvent ID: ${eventId}`, { width: 400 }).then(setQrImage);
+    QRCode.toDataURL(`Text: ${qrId}\nEvent ID: ${eventId}`, { width: 400, margin: 1 }).then(setQrImage);
   }, [qrId, eventId]);
 
+  const tilt = (event) => {
+    if (reduced || event.pointerType !== "mouse") return;
+    const box = event.currentTarget.getBoundingClientRect();
+    rotateY.set(((event.clientX - box.left) / box.width - 0.5) * 12);
+    rotateX.set(((event.clientY - box.top) / box.height - 0.5) * -12);
+  };
+  const level = () => {
+    rotateX.set(0);
+    rotateY.set(0);
+  };
+
   return (
-    <div className="p-3 border bg-slate-200 rounded-xl gap-4 relative">
-      {qrImage && <img src={qrImage} alt={title} className="object-cover rounded-t-lg w-full xl:min-w-80" />}
-      <div className="text-black mt-4 w-full flex flex-col justify-between text-center overflow-y-auto">
-        <div>
-          <h5 className="mb-2 text-xl 2xmobile:text-2xl font-bold tracking-tight">Event: {title}</h5>
-          <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">Date: {formatDate(date)}</p>
-          <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">Location: {location}</p>
-        </div>
-        <div className="w-full flex flex-col 2xmobile:flex-row justify-center gap-2 items-center">
-          {status === "unused" ? (
-            <span className="py-1 px-3 border rounded-full text-sm bg-green-500 text-white">Unused</span>
-          ) : (
-            <span className="py-1 px-3 border rounded-full text-sm bg-red-500 text-white">Used</span>
-          )}
-        </div>
+    <motion.article
+      onPointerMove={tilt}
+      onPointerLeave={level}
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      className="relative w-full max-w-sm overflow-hidden rounded-3xl bg-white text-ink"
+    >
+      <div className="relative bg-white p-5 pb-4">
+        {qrImage ? (
+          <img src={qrImage} alt={`QR code for ${title}`} className={`mx-auto aspect-square w-full max-w-64 ${used ? "opacity-25" : ""}`} />
+        ) : (
+          <div className="mx-auto aspect-square w-full max-w-64 animate-pulse rounded-xl bg-navy/10" />
+        )}
+        {used && (
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 rounded-lg border-4 border-stop bg-white/90 px-4 py-1 font-display text-3xl font-bold uppercase tracking-widest text-[#C81E45]">Used</span>
+        )}
       </div>
-    </div>
+      <div className="relative border-t-2 border-dashed border-navy/25 bg-navy p-5 text-white">
+        <span aria-hidden="true" className="absolute -left-3 -top-3 h-6 w-6 rounded-full bg-navy-deep" />
+        <span aria-hidden="true" className="absolute -right-3 -top-3 h-6 w-6 rounded-full bg-navy-deep" />
+        <p className={`mb-3 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] ${used ? "text-stop" : "text-go"}`}>
+          <span className="led" /> {used ? "Used" : "Unused"}
+        </p>
+        <h3 className="heading mb-3 text-2xl">{title}</h3>
+        <p className="text-sm text-white/80">{formatDate(date)}</p>
+        <p className="mt-1 text-sm text-sky-soft">{location}</p>
+      </div>
+    </motion.article>
   );
 }
 

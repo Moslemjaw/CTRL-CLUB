@@ -1,21 +1,29 @@
 import "./globals.css";
-import "react-toastify/dist/ReactToastify.css";
+import { Chakra_Petch, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import AuthProvider from "@/components/AuthProvider";
 
+const display = Chakra_Petch({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-display" });
+const body = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-body" });
+const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
+
 export const metadata = {
-  title: "CTRL",
+  title: "CTRL | Coding, Technology and Robotics League",
   description: "CTRL Club events by the AASU Programming Club",
   icons: { icon: "/icon.png" },
 };
 
+export const viewport = {
+  themeColor: "#00032E",
+};
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body>
         <AuthProvider>
           {children}
-          <ToastContainer />
+          <ToastContainer theme="dark" position="top-right" />
         </AuthProvider>
       </body>
     </html>

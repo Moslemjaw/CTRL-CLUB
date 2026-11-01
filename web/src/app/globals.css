@@ -1,12 +1,266 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --line: rgba(111, 203, 255, 0.18);
+}
+
+html {
+  background: #00032e;
+  scrollbar-color: #1a2a9a #00032e;
+}
+
 body {
-  font-family: Poppins, sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  @apply font-sans text-white antialiased;
+  background: #00032e;
+  overflow-x: clip;
+}
+
+::selection {
+  background: #6fcbff;
+  color: #000650;
+}
+
+:focus-visible {
+  outline: 2px solid #6fcbff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.22em] text-sky;
+  }
+
+  .heading {
+    @apply font-display font-bold leading-[1.02] tracking-tight;
+    text-wrap: balance;
+  }
+
+  .page-bg {
+    background:
+      radial-gradient(70rem 40rem at 85% -10%, rgba(111, 203, 255, 0.16), transparent 60%),
+      radial-gradient(50rem 30rem at 0% 100%, rgba(16, 26, 122, 0.8), transparent 70%),
+      #00032e;
+  }
+
+  .grid-lines {
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at center, black 10%, transparent 72%);
+  }
+
+  /* Buttons look like keys: pressing one drops it onto its sky-blue base. */
+  .btn {
+    @apply relative inline-flex min-h-12 items-center justify-center gap-3 rounded-xl px-6 py-3 font-display text-base font-semibold;
+    transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), background-color 200ms, color 200ms;
+  }
+
+  .btn-primary {
+    @apply bg-white text-ink;
+    box-shadow: 0 5px 0 #6fcbff;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #6fcbff, 0 16px 40px rgba(111, 203, 255, 0.35);
+  }
+
+  .btn-primary:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #6fcbff;
+  }
+
+  .btn-primary:disabled {
+    @apply cursor-not-allowed opacity-60;
+    transform: none;
+  }
+
+  .btn-ghost {
+    @apply border border-sky/40 text-white;
+    box-shadow: 0 5px 0 rgba(111, 203, 255, 0.22);
+  }
+
+  .btn-ghost:hover {
+    @apply border-sky bg-sky/10;
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost:active {
+    transform: translateY(5px);
+    box-shadow: none;
+  }
+
+  .btn-icon {
+    @apply inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl bg-white text-ink;
+    box-shadow: 0 4px 0 #6fcbff;
+    transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+  }
+
+  .btn-icon:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+
+  .field-label {
+    @apply mb-2 block font-mono text-xs uppercase tracking-[0.14em] text-sky-soft;
+  }
+
+  .field {
+    @apply block min-h-12 w-full rounded-xl border border-sky/25 bg-white/[0.04] px-4 py-3 text-base text-white;
+    color-scheme: dark;
+    transition: border-color 200ms, background-color 200ms, box-shadow 200ms;
+  }
+
+  .field::placeholder {
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .field:hover {
+    @apply border-sky/50;
+  }
+
+  .field:focus {
+    @apply border-sky bg-white/[0.07];
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(111, 203, 255, 0.22);
+  }
+
+  .field option {
+    background: #070e63;
+  }
+
+  .field-invalid {
+    @apply border-stop;
+  }
+
+  .field-error {
+    @apply mt-2 text-sm text-stop;
+  }
+
+  .panel {
+    @apply w-full rounded-2xl border border-sky/15 bg-navy-panel/70 p-5 2md:p-8;
+    backdrop-filter: blur(10px);
+  }
+
+  .led {
+    @apply inline-block h-2 w-2 rounded-full;
+    box-shadow: 0 0 10px currentColor;
+    background: currentColor;
+  }
+}
+
+/* Keycap: sized by its parent, so the same mark works from nav icon to hero. */
+.keycap {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 300 / 190;
+}
+
+.keycap-base,
+.keycap-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 13cqw;
+}
+
+.keycap-base {
+  background: #6fcbff;
+  transform: translate(5.5cqw, 7.5cqw);
+}
+
+.keycap-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 2.4cqw solid #05072a;
+  color: #05072a;
+  transition: transform 110ms var(--ease-out);
+}
+
+.keycap-word {
+  font-family: var(--font-display), sans-serif;
+  font-size: 30cqw;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  transform: translateX(0.03em);
+}
+
+.keycap[data-pressed="true"] .keycap-face {
+  transform: translate(4.4cqw, 6cqw);
+}
+
+/* Light travelling along a circuit trace. */
+.trace-pulse {
+  stroke-dasharray: 0.05 0.95;
+  animation: trace-run var(--run, 6s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes trace-run {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+.spin-slow { animation: spin-a 90s linear infinite; transform-origin: center; }
+.spin-rev { animation: spin-a 130s linear infinite reverse; transform-origin: center; }
+
+@keyframes spin-a {
+  to { transform: rotate(360deg); }
+}
+
+.marquee-text {
+  -webkit-text-stroke: 1.5px rgba(0, 6, 80, 0.3);
+  color: transparent;
+}
+
+/* Boarding-pass notches where a ticket's stub tears off. */
+.ticket-notched {
+  --notch: 13px;
+  mask:
+    radial-gradient(circle var(--notch) at var(--tear-x, 70%) 0, transparent 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at var(--tear-x, 70%) 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+}
+
+.scan-laser {
+  animation: scan-sweep 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes scan-sweep {
+  from { top: 8%; }
+  to { top: 92%; }
+}
+
+.page-enter {
+  animation: page-in 700ms var(--ease-out) both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+.Toastify__toast {
+  background: #070e63 !important;
+  color: #fff !important;
+  border: 1px solid rgba(111, 203, 255, 0.3);
+  border-radius: 14px !important;
+  font-family: var(--font-body), sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

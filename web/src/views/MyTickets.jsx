@@ -1,21 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { toast } from "react-toastify";
 import TicketCard from "@/components/molecule/TicketCard";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
+import FilterKeys from "@/components/molecule/FilterKeys";
+import ButtonComponent from "@/components/atoms/ButtonComponent";
 import { useAuth } from "@/components/AuthProvider";
 import { getCountUserTickets, getTicketsByUserId } from "@/api/tickets";
 
 const ITEMS_PER_PAGE = 6;
+const FILTERS = [
+  { value: "all", label: "All Tickets" },
+  { value: "unused", label: "Unused" },
+  { value: "used", label: "Used" },
+];
 
 export default function MyTickets() {
+  const reduced = useReducedMotion();
   const { userData } = useAuth();
   const userId = userData?.id;
   const [filter, setFilter] = useState("unused");
   const [ticketsData, setTicketsData] = useState([]);
   const [ticketsCount, setTicketsCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     getCountUserTickets(filter, userId)
@@ -29,62 +39,51 @@ export default function MyTickets() {
       .catch((error) => {
         toast.error(`Failed to fetch tickets: ${error.message}`);
         setTicketsData([]);
-      });
+      })
+      .finally(() => setLoaded(true));
   }, [currentPage, filter, userId]);
 
-  const handleFilterChange = (event) => {
-    setFilter(event.target.value);
+  const handleFilterChange = (value) => {
+    setFilter(value);
     setCurrentPage(1);
   };
 
   return (
-    <section id="events" className="relative bg-ticket-bg bg-no-repeat bg-cover bg-center w-full">
-      <div className="absolute w-full h-full bg-blue-600 bg-opacity-40"></div>
-      <div className="max-w-[1300px] mx-auto flex flex-col justify-center items-center">
-        <div className="z-10 mt-10 px-4 2xmobile:px-10">
-          <div className="border-t-2 border-base-color border-opacity-60 w-44 my-10"></div>
-          <h1 className="text-xl xmobile:text-2xl 2xmobile:text-4xl 2md:text-5xl text-gray-800 font-black z-10 text-center">My Tic<span className="text-base-color">ke</span>ts</h1>
+    <main className="page-bg relative min-h-screen px-5 pb-28 pt-20 lg:pt-28">
+      <div className="page-enter mx-auto max-w-[1300px]">
+        <div className="flex flex-col justify-between gap-7 lg:flex-row lg:items-end">
+          <div>
+            <p className="eyebrow mb-4">{userData?.name}</p>
+            <h1 className="heading text-5xl md:text-7xl">My Tickets</h1>
+          </div>
+          <FilterKeys label="Filter Tickets" options={FILTERS} value={filter} onChange={handleFilterChange} />
         </div>
-        <div className="z-10 mt-10">
-          <label htmlFor="eventFilter" className="mr-2 text-white">Filter Events: </label>
-          <select
-            id="eventFilter"
-            value={filter}
-            onChange={handleFilterChange}
-            className="border border-gray-300 rounded px-2 py-1"
-          >
-            <option value="all">All Tickets</option>
-            <option value="unused">Unused Tickets</option>
-            <option value="used">Used Tickets</option>
-          </select>
+
+        <div className="mt-12 grid justify-items-center gap-6 md:grid-cols-2 slg:grid-cols-3 lg:mt-16 lg:gap-8">
+          {ticketsData.map((ticket, index) => (
+            <motion.div
+              key={ticket.id}
+              initial={reduced ? false : { opacity: 0, y: 60, rotate: index % 2 ? 3 : -3 }}
+              animate={{ opacity: 1, y: 0, rotate: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-sm"
+            >
+              <TicketCard qrId={ticket.qrId} eventId={ticket.eventId} title={ticket.title} date={ticket.date} location={ticket.location} status={ticket.status} />
+            </motion.div>
+          ))}
         </div>
-        <div className="mt-20 grid md:grid-cols-2 slg:grid-cols-3 z-10 px-4 2xmobile:px-10 mb-20 gap-5 lg:gap-10 xl:gap-20">
-          {ticketsData.length > 0 ? (
-            ticketsData.map((ticket) => (
-              <TicketCard
-                key={ticket.id}
-                qrId={ticket.qrId}
-                eventId={ticket.eventId}
-                title={ticket.title}
-                date={ticket.date}
-                location={ticket.location}
-                status={ticket.status}
-              />
-            ))
-          ) : (
-            <p className="text-gray-600 text-center">No tickets found.</p>
-          )}
-        </div>
-        {ticketsData.length > 0 && (
-          <div className="mx-auto mb-20 z-10">
-            <PaginationRounded
-              count={Math.ceil(ticketsCount / ITEMS_PER_PAGE)}
-              page={currentPage}
-              onChange={(_event, value) => setCurrentPage(value)}
-            />
+
+        {loaded && ticketsData.length === 0 && (
+          <div className="rounded-3xl border border-dashed border-sky/30 px-6 py-20 text-center">
+            <p className="heading mb-6 text-3xl">No tickets found.</p>
+            <ButtonComponent text="Browse Events" path="/" />
           </div>
         )}
+
+        {ticketsData.length > 0 && (
+          <PaginationRounded count={Math.ceil(ticketsCount / ITEMS_PER_PAGE)} page={currentPage} onChange={(_event, value) => setCurrentPage(value)} />
+        )}
       </div>
-    </section>
+    </main>
   );
 }

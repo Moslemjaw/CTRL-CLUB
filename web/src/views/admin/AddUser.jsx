@@ -49,9 +49,9 @@ const AddUser = () => {
   });
 
   return (
-    <div className="lg:col-span-3 w-full mx-auto bg-white rounded-lg lg:ml-6 border">
-      <div className='p-6 border rounded-t-lg'>
-        <h1 className='text-2xl font-semibold text-blue-900'>Add User</h1>
+    <div className="panel !p-0">
+      <div className='border-b border-sky/15 p-6'>
+        <h1 className='heading text-3xl'>Add User</h1>
       </div>
       <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto p-6">
         <div>
@@ -62,10 +62,10 @@ const AddUser = () => {
             value={formik.values.name}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.name && formik.errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.name && formik.errors.name ? 'field-invalid' : ''}`}
           />
           {formik.touched.name && formik.errors.name && (
-            <div className="text-red-500 text-sm">{formik.errors.name}</div>
+            <div className="field-error">{formik.errors.name}</div>
           )}
         </div>
 
@@ -77,10 +77,10 @@ const AddUser = () => {
             value={formik.values.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.email && formik.errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.email && formik.errors.email ? 'field-invalid' : ''}`}
           />
           {formik.touched.email && formik.errors.email && (
-            <div className="text-red-500 text-sm">{formik.errors.email}</div>
+            <div className="field-error">{formik.errors.email}</div>
           )}
         </div>
 
@@ -92,10 +92,10 @@ const AddUser = () => {
             value={formik.values.password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.password && formik.errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.password && formik.errors.password ? 'field-invalid' : ''}`}
           />
           {formik.touched.password && formik.errors.password && (
-            <div className="text-red-500 text-sm">{formik.errors.password}</div>
+            <div className="field-error">{formik.errors.password}</div>
           )}
         </div>
 
@@ -107,10 +107,10 @@ const AddUser = () => {
             value={formik.values.confirmPassword}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.confirmPassword && formik.errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.confirmPassword && formik.errors.confirmPassword ? 'field-invalid' : ''}`}
           />
           {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-            <div className="text-red-500 text-sm">{formik.errors.confirmPassword}</div>
+            <div className="field-error">{formik.errors.confirmPassword}</div>
           )}
         </div>
 
@@ -122,10 +122,10 @@ const AddUser = () => {
             value={formik.values.phoneNumber}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.phoneNumber && formik.errors.phoneNumber ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.phoneNumber && formik.errors.phoneNumber ? 'field-invalid' : ''}`}
           />
           {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-            <div className="text-red-500 text-sm">{formik.errors.phoneNumber}</div>
+            <div className="field-error">{formik.errors.phoneNumber}</div>
           )}
         </div>
 
@@ -135,21 +135,21 @@ const AddUser = () => {
             value={formik.values.role}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.role && formik.errors.role ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.role && formik.errors.role ? 'field-invalid' : ''}`}
           >
             <option value="user">User</option>
             <option value="admin">Admin</option>
             <option value="scanner">Scanner</option>
           </select>
           {formik.touched.role && formik.errors.role && (
-            <div className="text-red-500 text-sm">{formik.errors.role}</div>
+            <div className="field-error">{formik.errors.role}</div>
           )}
         </div>
 
         <button
           type="submit"
           disabled={formik.isSubmitting}
-          className={`px-4 py-2 text-white rounded-md transition-all duration-300 ${formik.isSubmitting ? 'bg-gray-400' : 'bg-base-color hover:bg-green-700'}`}
+          className="btn btn-primary"
         >
           {formik.isSubmitting ? 'Submitting...' : 'Submit'}
         </button>

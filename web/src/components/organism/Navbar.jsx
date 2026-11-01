@@ -1,138 +1,87 @@
 "use client";
 
-const mainLogo = "/images/logo.png";
-import { IoMdClose } from "react-icons/io";
 import { useEffect, useState } from "react";
-import { FaBars } from "react-icons/fa";
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
+import BrandMark from "@/components/brand/BrandMark";
+import { useAuth } from "@/components/AuthProvider";
+import { scrollToId } from "@/lib/scroll";
+
+const SECTIONS = [
+  { id: "home", label: "Home" },
+  { id: "about", label: "About Us" },
+  { id: "events", label: "Events" },
+  { id: "contact", label: "Contact Us" },
+];
 
 function Navbar() {
-  const [isHalfScreen, setIsHalfScreen] = useState(true);
+  const { isLoggedIn } = useAuth();
   const [openNav, setOpenNav] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState("");
+  const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsHalfScreen(window.innerWidth > 950);
-      if (isHalfScreen !== window.innerWidth > 950) {
-        setOpenNav(false);
-      }
-    };
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100); // إذا تم التمرير لأكثر من 50 بكسل
-    };
-
+    // Whichever section crosses the middle of the screen is the active one.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
         });
       },
-      { threshold: 0.5 }
+      { rootMargin: "-50% 0px -50% 0px" }
     );
+    SECTIONS.forEach(({ id }) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+    return () => observer.disconnect();
+  }, []);
 
-    const sections = document.querySelectorAll("section");
-    sections.forEach((section) => observer.observe(section));
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll);
-
-    handleResize();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleScroll);
-      sections.forEach((section) => observer.unobserve(section));
-    };
-  }, [isHalfScreen]);
-
-  const handleNavButton = () => {
-    setOpenNav(!openNav);
-  };
-
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+  const goTo = (id) => {
+    setOpenNav(false);
+    scrollToId(id);
   };
 
   return (
-    <div className="fixed w-full z-[100]">
-      <header
-        className={`flex items-center justify-between max-w-[1300px] min-w-[260px] bg-slate-100 rounded-full mt-5 p-3 xl:mx-auto mx-5 relative`}>
-        <Link href="/">
-          <img src={mainLogo} alt="Logo" className="max-w-32 max-h-16 ml-6" />
-        </Link>
-        {isHalfScreen ? (
-          <div className="flex mr-4 gap-6">
-            <button
-              onClick={() => scrollToSection('home')}
-              className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'home' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-            >
-              Home
+    <motion.div initial={{ y: -90, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.9, delay: 1.25, ease: [0.16, 1, 0.3, 1] }} className="fixed inset-x-0 top-0 z-[100] px-3 pt-3 md:px-5 md:pt-4">
+      <header className="relative mx-auto flex max-w-[1300px] items-center justify-between rounded-2xl border border-sky/20 bg-navy-deep/75 py-2 pl-4 pr-2 backdrop-blur-xl">
+        <Link href="/" aria-label="CTRL home"><BrandMark /></Link>
+
+        <nav className="hidden items-center gap-1 slg:flex" aria-label="Sections">
+          {SECTIONS.map(({ id, label }) => (
+            <button key={id} onClick={() => goTo(id)} className={`relative rounded-xl px-4 py-2.5 font-display font-semibold transition-colors ${activeSection === id ? "text-ink" : "text-white/75 hover:text-white"}`}>
+              {activeSection === id && <motion.span layoutId="nav-active" className="absolute inset-0 rounded-xl bg-white shadow-[0_3px_0_#6FCBFF]" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
+              <span className="relative">{label}</span>
             </button>
-            <button
-              onClick={() => scrollToSection('about')}
-              className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'about' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-            >
-              About Us
-            </button>
-            <button
-              onClick={() => scrollToSection('events')}
-              className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'events' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-            >
-              Events
-            </button>
-            <button
-              onClick={() => scrollToSection('contact')}
-              className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'contact' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-            >
-              Contact Us
-            </button>
-          </div>
-        ) : (
-          <button type="button" onClick={handleNavButton} className="flex justify-center items-center w-10 h-10 min-w-10 mr-4 rounded-md rounded-r-md bg-base-color">
-            {!openNav ? <FaBars className="text-white text-2xl" /> : <IoMdClose className="text-white text-3xl" />}
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Link href={isLoggedIn ? "/myTickets" : "/logIn"} className="btn btn-primary hidden !min-h-11 !py-2 md:inline-flex">{isLoggedIn ? "My Tickets" : "Log In"}</Link>
+          <button type="button" aria-label={openNav ? "Close menu" : "Open menu"} aria-expanded={openNav} onClick={() => setOpenNav(!openNav)} className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-xl border border-sky/30 slg:hidden">
+            <motion.span animate={openNav ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }} className="h-0.5 w-5 bg-white" />
+            <motion.span animate={openNav ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }} className="h-0.5 w-5 bg-white" />
           </button>
-        )}
-        <div
-          className={`absolute bg-zinc-100 right-2 left-2 z-50 rounded-[3rem] p-5 transition-all duration-300 ${openNav && !isHalfScreen ? "top-24 opacity-100" : "-top-96 opacity-0"}`}>
-          <div className="flex flex-col w-full justify-between ml-4">
-            <div className="flex flex-col flex-1 gap-4 justify-start items-start w-full ">
-              <button
-                onClick={() => scrollToSection('home')}
-                className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'home' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() => scrollToSection('about')}
-                className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'about' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-              >
-                About Us
-              </button>
-              <button
-                onClick={() => scrollToSection('events')}
-                className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'events' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-              >
-                Events
-              </button>
-              <button
-                onClick={() => scrollToSection('contact')}
-                className={`font-semibold px-3 py-[6px] rounded-full transition-all duration-300 ${activeSection === 'contact' ? 'bg-base-color text-white' : 'hover:bg-base-color hover:text-white'}`}
-              >
-                Contact Us
-              </button>
-            </div>
-          </div>
         </div>
+
+        <AnimatePresence>
+          {openNav && (
+            <motion.nav
+              aria-label="Sections"
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-x-0 top-[calc(100%+0.5rem)] rounded-2xl border border-sky/20 bg-navy-deep/95 p-3 backdrop-blur-xl slg:hidden"
+            >
+              {SECTIONS.map(({ id, label }) => (
+                <button key={id} onClick={() => goTo(id)} className={`block w-full rounded-xl px-4 py-3 text-left font-display text-lg font-semibold ${activeSection === id ? "bg-white text-ink" : "text-white"}`}>{label}</button>
+              ))}
+              <Link href={isLoggedIn ? "/myTickets" : "/logIn"} className="btn btn-ghost mt-2 w-full md:hidden">{isLoggedIn ? "My Tickets" : "Log In"}</Link>
+            </motion.nav>
+          )}
+        </AnimatePresence>
       </header>
-    </div>
+    </motion.div>
   );
 }
 

@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuth } from "./AuthProvider";
+import KeyCap from "./brand/KeyCap";
 
 export function Loading() {
   return (
-    <div className="w-screen h-screen flex justify-center items-center">
-      <div className="w-16 h-16 rounded-full border-8 border-gray-200 border-t-base-color animate-spin" />
+    <div className="flex h-screen w-full items-center justify-center bg-navy-deep" role="status" aria-label="Loading">
+      <div className="w-24 animate-pulse"><KeyCap /></div>
     </div>
   );
 }

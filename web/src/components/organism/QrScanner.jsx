@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { motion } from "motion/react";
 import { toast } from "react-toastify";
 import { scanTicket } from "@/api/tickets";
 import { getAllEventsForScanner } from "@/api/events";
@@ -50,31 +51,49 @@ const QrScanner = () => {
   };
 
   const failed = ["Ticket already used", "Ticket not found", "This ticket is not available for this event."];
+  const tone = scanResult === "Ticket used successfully" ? "go" : failed.includes(scanResult) ? "stop" : "idle";
+  const toneClass = {
+    go: "border-go bg-go text-ink",
+    stop: "border-stop bg-stop text-ink",
+    idle: "border-sky/30 bg-navy-panel text-white",
+  }[tone];
 
   return (
-    <div className="text-center max-w-[600px]">
-      <div className="mb-2">
-        <select
-          value={selectedEvent}
-          onChange={(event) => setSelectedEvent(event.target.value)}
-          className="border p-2 rounded"
-        >
-          <option value="">Select an Event</option>
-          {events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.title}
-            </option>
+    <div className="w-full text-center">
+      <label htmlFor="scanner-event" className="field-label text-left">Event</label>
+      <select id="scanner-event" value={selectedEvent} onChange={(event) => setSelectedEvent(event.target.value)} className="field">
+        <option value="">Select an Event</option>
+        {events.map((event) => (
+          <option key={event.id} value={event.id}>
+            {event.title}
+          </option>
+        ))}
+      </select>
+
+      <div className="relative mt-5 aspect-square overflow-hidden rounded-3xl border border-sky/30 bg-black">
+        {cameraEnabled ? (
+          <Scanner onScan={handleScan} onError={() => setCameraEnabled(false)} components={{ finder: false }} />
+        ) : (
+          <p className="flex h-full items-center justify-center p-6 font-display text-2xl font-semibold">Open Your Camera</p>
+        )}
+        <div className="pointer-events-none absolute inset-[9%]" aria-hidden="true">
+          {["left-0 top-0 border-l-4 border-t-4 rounded-tl-2xl", "right-0 top-0 border-r-4 border-t-4 rounded-tr-2xl", "bottom-0 left-0 border-b-4 border-l-4 rounded-bl-2xl", "bottom-0 right-0 border-b-4 border-r-4 rounded-br-2xl"].map((corner) => (
+            <span key={corner} className={`absolute h-12 w-12 border-sky ${corner}`} />
           ))}
-        </select>
+          {cameraEnabled && <span className="scan-laser absolute inset-x-2 h-0.5 bg-sky shadow-[0_0_18px_4px_rgba(111,203,255,0.8)]" />}
+        </div>
       </div>
-      <p className={`text-3xl font-black mb-4 ${scanResult === "Ticket used successfully" ? "text-green-500" : failed.includes(scanResult) ? "text-red-500" : ""}`}>
-        {scanResult ? `"${scanResult}"` : "Scan QR Code"}
-      </p>
-      {cameraEnabled ? (
-        <Scanner onScan={handleScan} onError={() => setCameraEnabled(false)} />
-      ) : (
-        <p className="text-2xl">Open Your Camera</p>
-      )}
+
+      <motion.p
+        key={scanResult ?? "idle"}
+        role="status"
+        initial={{ scale: 0.92, opacity: 0.4 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 500, damping: 22 }}
+        className={`mt-5 rounded-2xl border-2 px-5 py-4 font-display text-xl font-bold md:text-2xl ${toneClass}`}
+      >
+        {scanResult ?? "Scan QR Code"}
+      </motion.p>
     </div>
   );
 };

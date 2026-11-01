@@ -3,13 +3,25 @@ module.exports = {
   content: ["./src/**/*.{js,jsx}"],
   theme: {
     extend: {
-      backgroundImage: {
-        "ticket-bg": "url('/images/bg3.jpg')",
-      },
       colors: {
-        "base-color": "#000650",
-        "second-color": "#2490c2",
-        "dark-blue": "#000650",
+        navy: {
+          DEFAULT: "#000650",
+          deep: "#00032E",
+          panel: "#070E63",
+          lift: "#101A7A",
+        },
+        sky: {
+          DEFAULT: "#6FCBFF",
+          soft: "#BDE6FF",
+        },
+        ink: "#05072A",
+        go: "#3EE8B0",
+        stop: "#FF6B85",
+      },
+      fontFamily: {
+        display: ["var(--font-display)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
     },
     screens: {

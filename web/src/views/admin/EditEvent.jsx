@@ -77,21 +77,21 @@ const EditEvent = () => {
   };
 
   return (
-    <div className="lg:col-span-3 w-full mx-auto p-6 bg-white rounded-lg lg:ml-6 border">
+    <div className="panel">
       <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto">
-        <div className="mb-4 border-b pb-4">
-          <label className="block text-gray-700">Event Cover Image</label>
+        <div className="mb-2 border-b border-sky/15 pb-5">
+          <label className="field-label">Event Cover Image</label>
           <div className="flex items-center space-x-4">
             {coverImagePreview && (
               <img
                 src={coverImagePreview}
                 alt="Cover Image Preview"
-                className="max-w-96 rounded-lg my-4 object-cover border-4 border-base-color"
+                className="max-w-96 rounded-lg my-4 object-cover border-2 border-sky"
               />
             )}
             <label
               htmlFor="coverImage"
-              className="cursor-pointer bg-base-color w-12 h-12 flex justify-center items-center hover:bg-second-color text-white rounded-md transition-all duration-300"
+              className="btn-icon"
             >
               <IoMdCloudUpload className="text-2xl" />
             </label>
@@ -105,9 +105,9 @@ const EditEvent = () => {
             />
           </div>
           {formik.touched.coverImage && formik.errors.coverImage ? (
-            <div className="text-red-500 text-sm">{formik.errors.coverImage}</div>
+            <div className="field-error">{formik.errors.coverImage}</div>
           ) : null}
-          <p className="text-gray-500 mt-2">PNG or JPG no bigger than 800px width and height</p>
+          <p className="text-white/60 mt-2 text-sm">PNG or JPG no bigger than 800px width and height</p>
         </div>
 
         <div>
@@ -118,11 +118,10 @@ const EditEvent = () => {
             value={formik.values.title}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.title && formik.errors.title ? 'field-invalid' : ''}`}
           />
           {formik.touched.title && formik.errors.title ? (
-            <div className="text-red-500 text-sm">{formik.errors.title}</div>
+            <div className="field-error">{formik.errors.title}</div>
           ) : null}
         </div>
 
@@ -134,11 +133,10 @@ const EditEvent = () => {
             value={formik.values.price}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.price && formik.errors.price ? 'field-invalid' : ''}`}
           />
           {formik.touched.price && formik.errors.price ? (
-            <div className="text-red-500 text-sm">{formik.errors.price}</div>
+            <div className="field-error">{formik.errors.price}</div>
           ) : null}
         </div>
 
@@ -150,11 +148,10 @@ const EditEvent = () => {
             value={formik.values.date}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.date && formik.errors.date ? 'field-invalid' : ''}`}
           />
           {formik.touched.date && formik.errors.date ? (
-            <div className="text-red-500 text-sm">{formik.errors.date}</div>
+            <div className="field-error">{formik.errors.date}</div>
           ) : null}
         </div>
 
@@ -165,13 +162,10 @@ const EditEvent = () => {
             value={formik.values.description}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.description && formik.errors.description
-              ? 'border-red-500'
-              : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.description && formik.errors.description ? 'field-invalid' : ''}`}
           />
           {formik.touched.description && formik.errors.description ? (
-            <div className="text-red-500 text-sm">{formik.errors.description}</div>
+            <div className="field-error">{formik.errors.description}</div>
           ) : null}
         </div>
 
@@ -183,11 +177,10 @@ const EditEvent = () => {
             value={formik.values.location}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.location && formik.errors.location ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.location && formik.errors.location ? 'field-invalid' : ''}`}
           />
           {formik.touched.location && formik.errors.location ? (
-            <div className="text-red-500 text-sm">{formik.errors.location}</div>
+            <div className="field-error">{formik.errors.location}</div>
           ) : null}
         </div>
 
@@ -199,11 +192,10 @@ const EditEvent = () => {
             value={formik.values.capacity}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.capacity && formik.errors.capacity ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.capacity && formik.errors.capacity ? 'field-invalid' : ''}`}
           />
           {formik.touched.capacity && formik.errors.capacity ? (
-            <div className="text-red-500 text-sm">{formik.errors.capacity}</div>
+            <div className="field-error">{formik.errors.capacity}</div>
           ) : null}
         </div>
         <div>
@@ -214,18 +206,17 @@ const EditEvent = () => {
             value={formik.values.availableTickets}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.availableTickets && formik.errors.availableTickets ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`field ${formik.touched.availableTickets && formik.errors.availableTickets ? 'field-invalid' : ''}`}
           />
           {formik.touched.availableTickets && formik.errors.availableTickets ? (
-            <div className="text-red-500 text-sm">{formik.errors.availableTickets}</div>
+            <div className="field-error">{formik.errors.availableTickets}</div>
           ) : null}
         </div>
 
         <div>
           <button
             type="submit"
-            className="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-all duration-300"
+            className="btn btn-primary"
             disabled={formik.isSubmitting}  // Disable button while submitting
           >
             {formik.isSubmitting ? 'Updating...' : 'Update'}

@@ -4,9 +4,15 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
 import EventCard from "@/components/molecule/EventCard";
+import FilterKeys from "@/components/molecule/FilterKeys";
 import { deleteEvent, getAllEvents, getCountEvents } from "@/api/events";
 
 const ITEMS_PER_PAGE = 3;
+const FILTERS = [
+  { value: "all", label: "All Events" },
+  { value: "open", label: "Open Events" },
+  { value: "closed", label: "Closed Events" },
+];
 
 export default function AllEvents() {
   const [filter, setFilter] = useState("open");
@@ -37,30 +43,18 @@ export default function AllEvents() {
     }
   };
 
-  const handleFilterChange = (event) => {
-    setFilter(event.target.value);
+  const handleFilterChange = (value) => {
+    setFilter(value);
     setCurrentPage(1);
   };
 
   return (
-    <div className="lg:col-span-3 w-full mx-auto lg:ml-6 bg-white rounded-lg">
-      <div className="p-6 border rounded-t-lg">
-        <h1 className="text-2xl font-semibold text-blue-900 ">All Events</h1>
+    <div>
+      <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-center">
+        <h1 className="heading text-4xl md:text-5xl">All Events</h1>
+        <FilterKeys label="Filter Events" options={FILTERS} value={filter} onChange={handleFilterChange} />
       </div>
-      <div className="z-10 mt-10 flex justify-center items-center gap-4">
-        <label htmlFor="eventFilter" className=" text-black">Filter Events: </label>
-        <select
-          id="eventFilter"
-          value={filter}
-          onChange={handleFilterChange}
-          className="border border-gray-300 rounded px-2 py-1"
-        >
-          <option value="all">All Events</option>
-          <option value="open">Open Events</option>
-          <option value="closed">Closed Events</option>
-        </select>
-      </div>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         {eventsData.map((event) => (
           <EventCard
             key={event.id}

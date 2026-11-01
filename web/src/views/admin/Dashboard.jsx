@@ -48,32 +48,32 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="lg:col-span-3 w-full mx-auto lg:ml-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-lg">
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
         <DashboardCard title="Users" count={usersCount} />
         <DashboardCard title="All Events" count={eventsCount} />
         <DashboardCard title="All Tickets" count={ticketsCount} />
       </div>
 
-      <div className="bg-white p-6 rounded-lg divide-y border overflow-x-auto">
-        <h2 className="text-2xl font-semibold text-blue-900 mb-4">Admin Data</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+      <div className="panel">
+        <h2 className="heading mb-5 text-2xl">Admin Data</h2>
+        <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <p className="text-gray-900 font-semibold">Name</p>
-            <p className="text-lg text-gray-600">{userData?.name}</p>
+            <p className="field-label !mb-1">Name</p>
+            <p className="text-lg text-white">{userData?.name}</p>
           </div>
           <div>
-            <p className="text-gray-900 font-semibold">Email</p>
-            <p className="text-lg text-gray-600">{userData?.email}</p>
+            <p className="field-label !mb-1">Email</p>
+            <p className="text-lg text-white">{userData?.email}</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg divide-y border">
-        <h2 className="text-2xl font-semibold text-blue-900 mb-4">Users</h2>
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+      <div className="panel">
+        <h2 className="heading mb-5 text-2xl">Users</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-white/80">
+            <thead className="border-b border-sky/20 font-mono text-xs uppercase tracking-[0.12em] text-sky">
               <tr>
                 <th scope="col" className="px-6 py-3">Name</th>
                 <th scope="col" className="px-6 py-3">Email</th>
@@ -85,8 +85,8 @@ export default function Dashboard() {
             <tbody>
               {usersData.length > 0 ? (
                 usersData.map((user) => (
-                  <tr key={user.id} className="bg-white border-b">
-                    <td scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                  <tr key={user.id} className="border-b border-sky/10 transition-colors hover:bg-white/5">
+                    <td scope="row" className="px-6 py-4 whitespace-nowrap font-medium text-white">
                       {user.name}
                     </td>
                     <td className="px-6 py-4">{user.email}</td>
@@ -97,7 +97,7 @@ export default function Dashboard() {
                         <button
                           type="button"
                           onClick={() => handleDelete(user.id)}
-                          className="font-medium text-red-600 hover:underline"
+                          className="font-medium text-stop hover:underline"
                         >
                           Delete User
                         </button>
@@ -107,7 +107,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-4 text-center text-white/60">
                     No users found.
                   </td>
                 </tr>

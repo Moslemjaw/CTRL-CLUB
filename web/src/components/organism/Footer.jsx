@@ -1,20 +1,11 @@
-"use client";
-
 export default function Footer() {
   return (
-    <div>
-      <footer className="pb-2 2md:pb-4 w-full bg-zinc-200">
-        <div className="flex flex-col justify-center 2md:flex-row border-t border-gray-500 mt-4 pt-2 2md:pt-6 text-center 2md:justify-around">
-          <div className="flex justify-center">
-            <p className="text-gray-700 ">CTRL 2025 © All rights reserved.</p>
-            
-          </div>
-          <div className="flex gap-5 justify-center">
-            <p className="text-gray-700 ">AASU PROGRAMMING CLUB</p>
-          </div>
-        </div>
-      </footer>
-    </div>
-
-  )
+    <footer className="relative w-full overflow-hidden border-t border-sky/15 bg-navy-deep px-5 pt-8">
+      <div className="mx-auto flex max-w-[1300px] flex-col justify-between gap-2 font-mono text-xs uppercase tracking-[0.14em] text-white/65 md:flex-row">
+        <p>CTRL {new Date().getFullYear()} &copy; All rights reserved.</p>
+        <p>AASU Programming Club</p>
+      </div>
+      <p aria-hidden="true" className="mt-4 select-none text-center font-display text-[30vw] font-bold leading-[0.78] tracking-tight text-sky/[0.08] xl:text-[24rem]">CTRL</p>
+    </footer>
+  );
 }

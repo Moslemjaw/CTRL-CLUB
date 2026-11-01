@@ -1,10 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { animate, useReducedMotion } from "motion/react";
+
 const DashboardCard = ({ title, count }) => {
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(0);
+
+  useEffect(() => {
+    if (reduced) {
+      setShown(count);
+      return;
+    }
+    const controls = animate(0, count, { duration: 1.2, ease: [0.16, 1, 0.3, 1], onUpdate: (value) => setShown(Math.round(value)) });
+    return () => controls.stop();
+  }, [count, reduced]);
+
   return (
-    <div className="p-6 bg-white rounded-lg border pb-8">
-      <p className="text-gray-600 font-medium">{title}</p>
-      <p className="text-3xl font-bold text-blue-900">{count.toString().padStart(2, '0')}</p>
+    <div className="panel !p-5">
+      <p className="eyebrow">{title}</p>
+      <p className="mt-3 font-display text-5xl font-semibold tabular-nums">{shown.toString().padStart(2, "0")}</p>
     </div>
   );
 };

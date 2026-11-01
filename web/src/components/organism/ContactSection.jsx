@@ -1,101 +1,61 @@
 "use client";
 
 import { useFormik } from "formik";
-const contact = "/images/contact.jpg";
-import { sendContactForm } from "@/api/contact";
+import { motion, useReducedMotion } from "motion/react";
 import { toast } from "react-toastify";
+import { sendContactForm } from "@/api/contact";
+import CircuitRings from "@/components/brand/CircuitRings";
+import KeyCap from "@/components/brand/KeyCap";
+
+const FIELDS = [
+  { name: "name", label: "Name", type: "text", autoComplete: "name" },
+  { name: "email", label: "Email", type: "email", autoComplete: "email" },
+  { name: "phoneNumber", label: "Phone Number", type: "tel", autoComplete: "tel" },
+  { name: "subject", label: "Subject", type: "text" },
+];
+
 const ContactForm = () => {
+  const reduced = useReducedMotion();
   const formik = useFormik({
-    initialValues: {
-      name: "",
-      email: "",
-      phoneNumber: "",
-      subject: "",
-      message: "",
-    },
+    initialValues: { name: "", email: "", phoneNumber: "", subject: "", message: "" },
     onSubmit: async (values, { resetForm }) => {
       try {
         await sendContactForm(values);
         toast.success("Message sent successfully!");
         resetForm();
-            } catch (error) {
+      } catch {
         toast.error("Failed to send message. Please try again.");
       }
     },
   });
 
   return (
-    <section id="contact" className="flex flex-col lg:flex-row gap-16 mt-20 pb-14 px-4 w-full">
-      <div data-aos="fade-right" data-aos-duration="1500" className="flex-1 relative overflow-hidden rounded-3xl group">
-        <div className=" absolute w-1/2 h-full bg-slate-700 bg-opacity-50 group-hover:w-0 transition-all duration-500 z-10"></div>
-        <div className=" absolute w-1/2 h-full right-0 bg-slate-700 bg-opacity-50 group-hover:w-0 transition-all duration-500 z-10"></div>
-        <img
-          src={contact}
-          alt="Contact"
-          className="w-full max-h-[550px] min-h[549px] h-[550px] rounded-3xl object-cover group-hover:scale-125 transition-all duration-500"
-        />
-
+    <section id="contact" className="relative overflow-hidden bg-navy-deep px-5 py-24 lg:py-36">
+      <div className="absolute -left-40 top-1/2 w-[46rem] -translate-y-1/2 opacity-25" aria-hidden="true">
+        <CircuitRings className="h-full w-full" delay={0} />
       </div>
+      <div className="relative mx-auto grid max-w-[1300px] gap-14 lg:grid-cols-2 lg:gap-20">
+        <motion.div initial={reduced ? false : { x: -40, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col justify-center">
+          <p className="eyebrow mb-4">Contact Us</p>
+          <h2 className="heading text-5xl md:text-6xl xl:text-7xl">Get In Touch With Us</h2>
+          <div className="mt-10 hidden w-44 lg:block"><KeyCap /></div>
+        </motion.div>
 
-      <div className="flex-1 flex flex-col justify-center">
-        <h2 data-aos="fade-down" data-aos-duration="1500" className="text-base font-medium text-base-color">+ CONTACT US</h2>
-        <h3 data-aos="fade-left" data-aos-duration="1500" className="text-5xl font-black text-gray-900 mb-10 mt-3">
-          <span className="text-base-color">Get</span> In Touch With Us
-        </h3>
-        <form data-aos="fade-up" data-aos-duration="1500" onSubmit={formik.handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter Name"
-              required
-              className="p-4 border rounded-lg w-full"
-              value={formik.values.name}
-              onChange={formik.handleChange}
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter Email"
-              required
-              className="p-4 border rounded-lg w-full"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-            />
-            <input
-              type="text"
-              name="phoneNumber"
-              placeholder="Phone Number"
-              required
-              className="p-4 border rounded-lg w-full"
-              value={formik.values.phoneNumber}
-              onChange={formik.handleChange}
-            />
-            <input
-              type="text"
-              name="subject"
-              placeholder="Subject"
-              required
-              className="p-4 border rounded-lg w-full"
-              value={formik.values.subject}
-              onChange={formik.handleChange}
-            />
+        <motion.form initial={reduced ? false : { y: 40, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }} onSubmit={formik.handleSubmit} className="panel">
+          <div className="grid gap-5 md:grid-cols-2">
+            {FIELDS.map((field) => (
+              <div key={field.name}>
+                <label htmlFor={`contact-${field.name}`} className="field-label">{field.label}</label>
+                <input id={`contact-${field.name}`} name={field.name} type={field.type} autoComplete={field.autoComplete} required className="field" value={formik.values[field.name]} onChange={formik.handleChange} />
+              </div>
+            ))}
           </div>
-          <textarea
-            name="message"
-            placeholder="Your Message"
-            required
-              className="p-4 border rounded-lg w-full h-32 mb-4"
-            value={formik.values.message}
-            onChange={formik.handleChange}
-          />
-          <button
-            type="submit"
-            className="bg-base-color hover:bg-blue-600  text-white px-4 py-2 rounded-lg flex items-center gap-2"
-          >
-            Send Message
+          <label htmlFor="contact-message" className="field-label mt-5">Your Message</label>
+          <textarea id="contact-message" name="message" required className="field h-36 resize-y" value={formik.values.message} onChange={formik.handleChange} />
+          <button type="submit" disabled={formik.isSubmitting} className="btn btn-primary mt-6 w-full md:w-auto">
+            {formik.isSubmitting ? "Sending..." : "Send Message"}
           </button>
-        </form>
+        </motion.form>
       </div>
     </section>
   );

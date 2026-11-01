@@ -51,39 +51,39 @@ const ResetPasswordForm = () => {
       {({ getFieldProps, isSubmitting }) => (
         <Form className="mt-6 flex flex-col gap-6">
           <div>
-            <label className="block mb-2 font-medium">New Password</label>
+            <label className="field-label">New Password</label>
             <input
               type="password"
               placeholder="Enter your new password"
-              className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+              className="field"
               {...getFieldProps('newPassword')}
             />
             <ErrorMessage
               name="newPassword"
               component="div"
-              className="text-red-500 text-sm mt-1"
+              className="field-error"
             />
           </div>
 
           <div>
-            <label className="block mb-2 font-medium">Confirm Password</label>
+            <label className="field-label">Confirm Password</label>
             <input
               type="password"
               placeholder="Confirm your new password"
-              className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+              className="field"
               {...getFieldProps('confirmPassword')}
             />
             <ErrorMessage
               name="confirmPassword"
               component="div"
-              className="text-red-500 text-sm mt-1"
+              className="field-error"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-base-color text-white py-3 font-semibold rounded-md hover:bg-second-color transition-all duration-300"
+            className="btn btn-primary w-full"
           >
             Reset Password
           </button>

@@ -45,7 +45,7 @@ const SignUpForm = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    phoneNumber: '',  // حقل رقم الهاتف الجديد
+    phoneNumber: '',
     verificationCode: '',
   };
 
@@ -64,7 +64,7 @@ const SignUpForm = () => {
       .required('Required'),
     phoneNumber: Yup.number()
       .typeError('Phone number must be a number')
-      .required('Required'),  // التحقق من رقم الهاتف
+      .required('Required'),
   });
 
   const verificationSchema = Yup.object({
@@ -93,89 +93,87 @@ const SignUpForm = () => {
         <Form className="flex flex-col gap-4 mb-20">
           {!isVerificationStep ? (
             <>
-              {/* نموذج إدخال بيانات المستخدم */}
               <div>
-                <label htmlFor="name" className="block mb-2 font-medium">
+                <label htmlFor="name" className="field-label">
                   Full Name
                 </label>
                 <input
                   id="name"
                   type="text"
                   {...getFieldProps('name')}
-                  className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                  className="field"
                 />
-                <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
+                <ErrorMessage name="name" component="div" className="field-error" />
               </div>
 
               <div>
-                <label htmlFor="email" className="block mb-2 font-medium">
+                <label htmlFor="email" className="field-label">
                   Email
                 </label>
                 <input
                   id="email"
                   type="email"
                   {...getFieldProps('email')}
-                  className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                  className="field"
                 />
-                <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
+                <ErrorMessage name="email" component="div" className="field-error" />
               </div>
 
               <div>
-                <label htmlFor="phoneNumber" className="block mb-2 font-medium">
+                <label htmlFor="phoneNumber" className="field-label">
                   Phone Number
                 </label>
                 <input
                   id="phoneNumber"
                   type="text"
                   {...getFieldProps('phoneNumber')}
-                  className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                  className="field"
                 />
-                <ErrorMessage name="phoneNumber" component="div" className="text-red-500 text-sm mt-1" />
+                <ErrorMessage name="phoneNumber" component="div" className="field-error" />
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="password" className="block mb-2 font-medium">
+                  <label htmlFor="password" className="field-label">
                     Password
                   </label>
                   <input
                     id="password"
                     type="password"
                     {...getFieldProps('password')}
-                    className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                    className="field"
                   />
-                  <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
+                  <ErrorMessage name="password" component="div" className="field-error" />
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block mb-2 font-medium">
+                  <label htmlFor="confirmPassword" className="field-label">
                     Confirm Password
                   </label>
                   <input
                     id="confirmPassword"
                     type="password"
                     {...getFieldProps('confirmPassword')}
-                    className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                    className="field"
                   />
-                  <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-sm mt-1" />
+                  <ErrorMessage name="confirmPassword" component="div" className="field-error" />
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* نموذج إدخال كود التحقق */}
               <div>
-                <label htmlFor="verificationCode" className="block mb-2 font-medium">
+                <label htmlFor="verificationCode" className="field-label">
                   Verification Code
                 </label>
                 <input
                   id="verificationCode"
                   type="text"
                   {...getFieldProps('verificationCode')}
-                  className="w-full min-h-12 p-3 pl-5 border rounded-md focus:outline-none focus:ring-2 focus:ring-base-color"
+                  className="field"
                 />
-                <ErrorMessage name="verificationCode" component="div" className="text-red-500 text-sm mt-1" />
-                <p className="text-lg font-semibold text-base-color mt-4">Check Your Email</p>
+                <ErrorMessage name="verificationCode" component="div" className="field-error" />
+                <p className="mt-4 font-display text-lg font-semibold text-sky">Check Your Email</p>
               </div>
             </>
           )}
@@ -183,9 +181,8 @@ const SignUpForm = () => {
           <div className="flex justify-between text-center mt-4">
             <button
               type="submit"
-              disabled={isSubmitting || loading} // تعطيل الزر أثناء التحميل
-              className={`w-full py-3 font-semibold rounded-md transition-all duration-300 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-base-color text-white hover:bg-second-color'
-                }`}
+              disabled={isSubmitting || loading}
+              className="btn btn-primary w-full"
             >
               {loading ? 'Loading...' : isVerificationStep ? 'Verify Code' : 'Sign Up'}
             </button>
