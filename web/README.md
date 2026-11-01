@@ -27,7 +27,7 @@ update public.profiles set role = 'admin' where email = 'you@example.com';
 
 ## Supabase setup
 
-Project ref: `exzkgtqkemfvxyfruwka`. The schema, access rules and Edge Functions (`admin-users`, `send-tickets`, `send-contact`) are already deployed.
+Project ref: `ztnorzbajrebenknhxge`. The schema, access rules and Edge Functions (`admin-users`, `send-tickets`, `send-contact`) are already deployed. Their source is in `supabase/`.
 
 1. **SMTP** (Authentication > Emails > SMTP settings): host `smtp.gmail.com`, port `587`, your Gmail address, and a Google app password.
 2. **Confirm signup template** (Authentication > Emails): put `{{ .Token }}` in the body so the email contains the 6-digit code.
