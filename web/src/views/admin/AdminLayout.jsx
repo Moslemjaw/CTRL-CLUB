@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { MdEmojiEvents, MdOutlineAddToPhotos } from "react-icons/md";
 import { IoClose, IoLogOut, IoMenu, IoSettingsSharp } from "react-icons/io5";
 import { BiSolidDashboard } from "react-icons/bi";
-import { BsCalendar3, BsJournalText, BsKanban, BsQrCodeScan } from "react-icons/bs";
+import { BsCalendar3, BsJournalText, BsKanban, BsPencilSquare, BsQrCodeScan } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
 import { IoMdPersonAdd } from "react-icons/io";
 import BrandMark from "@/components/brand/BrandMark";
@@ -29,6 +29,7 @@ const MANAGE = {
   links: [
     { href: "/admin/allEvents", label: "All Events", icon: <MdEmojiEvents /> },
     { href: "/admin/addEvent", label: "Add Event", icon: <MdOutlineAddToPhotos /> },
+    { href: "/admin/blogs", label: "Blogs", icon: <BsPencilSquare /> },
     { href: "/admin/addUser", label: "Add User", icon: <IoMdPersonAdd /> },
   ],
 };

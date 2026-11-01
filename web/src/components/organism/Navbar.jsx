@@ -58,6 +58,7 @@ function Navbar() {
               <span className="relative">{label}</span>
             </button>
           ))}
+          <Link href="/blog" className="rounded-xl px-4 py-2.5 font-display font-semibold text-white/75 transition-colors hover:text-white">Blog</Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -81,6 +82,7 @@ function Navbar() {
               {SECTIONS.map(({ id, label }) => (
                 <button key={id} onClick={() => goTo(id)} className={`block w-full rounded-xl px-4 py-3 text-left font-display text-lg font-semibold ${activeSection === id ? "bg-white text-ink" : "text-white"}`}>{label}</button>
               ))}
+              <Link href="/blog" className="block w-full rounded-xl px-4 py-3 text-left font-display text-lg font-semibold text-white">Blog</Link>
               <Link href={account.href} className="btn btn-ghost mt-2 w-full md:hidden">{account.label}</Link>
             </motion.nav>
           )}
