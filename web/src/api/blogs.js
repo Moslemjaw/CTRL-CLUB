@@ -27,6 +27,15 @@ export async function getBlogPosts(page) {
   return data.map(toPost);
 }
 
+export async function getAllBlogPosts() {
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data.map(toPost);
+}
+
 export async function getCountBlogPosts() {
   const { count, error } = await supabase
     .from("blog_posts")
