@@ -14,7 +14,7 @@ import BrandMark from "@/components/brand/BrandMark";
 import { useAuth } from "@/components/AuthProvider";
 import { logOut } from "@/api/auth";
 import { getUnreadCount, MESSAGES_CHANGED } from "@/api/messages";
-import { ProfileAvatar } from "./EditProfile";
+import ProfileAvatar from "@/components/atoms/ProfileAvatar";
 
 const OVERVIEW = {
   links: [

@@ -6,19 +6,11 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import { IoMdCloudUpload } from "react-icons/io";
 import { useAuth } from "@/components/AuthProvider";
-import { avatarUrl, changePassword, removeAvatar, setAvatar, updateProfile } from "@/api/users";
+import ProfileAvatar from "@/components/atoms/ProfileAvatar";
+import { changePassword, removeAvatar, setAvatar, updateProfile } from "@/api/users";
 
 const ROLE_LABELS = { admin: "Admin", ctrl_member: "CTRL Member", scanner: "Scanner", user: "User" };
 const BIO_LIMIT = 300;
-
-export function ProfileAvatar({ userData, className = "h-24 w-24 text-4xl" }) {
-  const url = avatarUrl(userData?.avatar);
-  return url ? (
-    <img src={url} alt="" className={`shrink-0 rounded-2xl border-2 border-white object-cover shadow-[0_4px_0_#6FCBFF] ${className}`} />
-  ) : (
-    <span aria-hidden="true" className={`flex shrink-0 items-center justify-center rounded-2xl bg-white font-display font-bold text-ink shadow-[0_4px_0_#6FCBFF] ${className}`}>{userData?.name?.[0]?.toUpperCase()}</span>
-  );
-}
 
 function Field({ formik, name, label, type = "text", autoComplete, hint }) {
   const error = formik.touched[name] && formik.errors[name];

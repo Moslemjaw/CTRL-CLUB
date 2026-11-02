@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import BrandMark from "@/components/brand/BrandMark";
-import { useAuth } from "@/components/AuthProvider";
+import AccountMenu from "./AccountMenu";
 import { scrollToId } from "@/lib/scroll";
 
 const SECTIONS = [
@@ -15,13 +15,7 @@ const SECTIONS = [
 ];
 
 function Navbar() {
-  const { isLoggedIn, role } = useAuth();
   const [openNav, setOpenNav] = useState(false);
-  const account = !isLoggedIn
-    ? { href: "/logIn", label: "Log In" }
-    : role === "ctrl_member"
-      ? { href: "/workspace", label: "Workspace" }
-      : { href: "/myTickets", label: "My Tickets" };
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
@@ -62,7 +56,7 @@ function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href={account.href} className="btn btn-primary hidden !min-h-11 !py-2 md:inline-flex">{account.label}</Link>
+          <AccountMenu />
           <button type="button" aria-label={openNav ? "Close menu" : "Open menu"} aria-expanded={openNav} onClick={() => setOpenNav(!openNav)} className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-xl border border-sky/30 slg:hidden">
             <motion.span animate={openNav ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }} className="h-0.5 w-5 bg-white" />
             <motion.span animate={openNav ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }} className="h-0.5 w-5 bg-white" />
@@ -83,7 +77,6 @@ function Navbar() {
                 <button key={id} onClick={() => goTo(id)} className={`block w-full rounded-xl px-4 py-3 text-left font-display text-lg font-semibold ${activeSection === id ? "bg-white text-ink" : "text-white"}`}>{label}</button>
               ))}
               <Link href="/blog" className="block w-full rounded-xl px-4 py-3 text-left font-display text-lg font-semibold text-white">Blog</Link>
-              <Link href={account.href} className="btn btn-ghost mt-2 w-full md:hidden">{account.label}</Link>
             </motion.nav>
           )}
         </AnimatePresence>

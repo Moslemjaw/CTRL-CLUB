@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { toast } from "react-toastify";
-import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
+import SiteHeader from "@/components/organism/SiteHeader";
 import Footer from "@/components/organism/Footer";
 import BrandMark from "@/components/brand/BrandMark";
 import { Loading } from "@/components/Guards";
@@ -67,7 +67,7 @@ const EventDetails = () => {
 
   return (
     <div className="bg-navy-deep">
-      <SpeedDialComponent />
+      <SiteHeader />
       <header className="relative h-[62vh] min-h-96 overflow-hidden">
         {event.coverImage ? (
           <motion.img
@@ -83,7 +83,6 @@ const EventDetails = () => {
           <div className="absolute inset-0 flex items-center justify-center bg-navy-lift/40 pb-24"><BrandMark className="scale-150" /></div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy-deep/30 to-navy-deep/40" />
-        <Link href="/" className="btn btn-ghost absolute left-5 top-5 !min-h-11 bg-navy-deep/60 backdrop-blur">&larr; Home</Link>
       </header>
 
       <main className="relative z-10 mx-auto -mt-28 grid max-w-[1200px] gap-8 px-5 pb-24 lg:grid-cols-[1fr_24rem] lg:gap-14">

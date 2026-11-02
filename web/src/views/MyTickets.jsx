@@ -49,7 +49,7 @@ export default function MyTickets() {
   };
 
   return (
-    <main className="page-bg relative min-h-screen px-5 pb-28 pt-20 lg:pt-28">
+    <main className="page-bg relative min-h-screen px-5 pb-16 pt-10 lg:pt-16">
       <div className="page-enter mx-auto max-w-[1300px]">
         <div className="flex flex-col justify-between gap-7 lg:flex-row lg:items-end">
           <div>

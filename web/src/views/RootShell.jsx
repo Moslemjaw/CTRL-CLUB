@@ -1,10 +1,10 @@
 import Footer from "@/components/organism/Footer";
-import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
+import SiteHeader from "@/components/organism/SiteHeader";
 
-export default function RootShell({ children }) {
+export default function RootShell({ children, header = true }) {
   return (
     <div className="relative flex min-h-screen flex-col bg-navy-deep">
-      <SpeedDialComponent />
+      {header && <SiteHeader />}
       <div className="flex-1">{children}</div>
       <Footer />
     </div>

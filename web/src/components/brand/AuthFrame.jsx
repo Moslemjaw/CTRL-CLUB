@@ -6,12 +6,10 @@ import BrandMark from "./BrandMark";
 import CircuitRings from "./CircuitRings";
 import KeyCap from "./KeyCap";
 import SignalField from "./SignalField";
-import SpeedDialComponent from "@/components/organism/SpeedDialComponent";
 
 export default function AuthFrame({ title, tagline, heading, children }) {
   return (
     <div className="grid min-h-screen bg-navy-deep 2md:grid-cols-2">
-      <SpeedDialComponent />
       <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-navy px-10 text-center 2md:flex">
         <SignalField opacity={0.8} />
         <div className="relative flex h-[26rem] w-full items-center justify-center">
