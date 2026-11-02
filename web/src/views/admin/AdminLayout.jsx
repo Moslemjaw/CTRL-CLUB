@@ -7,14 +7,20 @@ import { AnimatePresence, motion } from "motion/react";
 import { MdEmojiEvents, MdOutlineAddToPhotos } from "react-icons/md";
 import { IoClose, IoLogOut, IoMenu, IoSettingsSharp } from "react-icons/io5";
 import { BiSolidDashboard } from "react-icons/bi";
-import { BsCalendar3, BsJournalText, BsKanban, BsPencilSquare, BsQrCodeScan } from "react-icons/bs";
+import { BsCalendar3, BsEnvelope, BsJournalText, BsKanban, BsPencilSquare, BsQrCodeScan } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
 import { IoMdPersonAdd } from "react-icons/io";
 import BrandMark from "@/components/brand/BrandMark";
 import { useAuth } from "@/components/AuthProvider";
 import { logOut } from "@/api/auth";
+import { getUnreadCount, MESSAGES_CHANGED } from "@/api/messages";
 
-const OVERVIEW = { links: [{ href: "/admin", label: "Dashboard", icon: <BiSolidDashboard /> }] };
+const OVERVIEW = {
+  links: [
+    { href: "/admin", label: "Dashboard", icon: <BiSolidDashboard /> },
+    { href: "/admin/messages", label: "Messages", icon: <BsEnvelope /> },
+  ],
+};
 const WORKSPACE = {
   title: "Workspace",
   links: [
@@ -37,7 +43,7 @@ const SETTINGS = { href: "/admin/settings", label: "Settings", icon: <IoSettings
 
 const rowClass = "flex min-h-11 w-full items-center gap-3 lg:min-h-10 rounded-xl px-3 font-display font-semibold text-white/75 transition-colors hover:bg-white/5 hover:text-white";
 
-function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton }) {
+function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton, unread }) {
   const { userData } = useAuth();
 
   const renderLink = ({ href, label, icon }) => (
@@ -45,6 +51,9 @@ function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton 
       {isActive(href) && <motion.span layoutId={activeId} className="absolute inset-0 rounded-xl bg-white shadow-[0_3px_0_#6FCBFF]" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
       <span className="relative text-lg" aria-hidden="true">{icon}</span>
       <span className="relative">{label}</span>
+      {href === "/admin/messages" && unread > 0 && (
+        <span className="relative ml-auto flex h-6 min-w-6 items-center justify-center rounded-full bg-sky px-1.5 font-mono text-xs font-medium text-ink" aria-label={`${unread} unread`}>{unread}</span>
+      )}
     </Link>
   );
 
@@ -86,11 +95,20 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { role } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
   const closeRef = useRef(null);
   const isAdmin = role === "admin";
   const groups = isAdmin ? [OVERVIEW, WORKSPACE, MANAGE] : [WORKSPACE];
   const isActive = (href) => (href === "/admin" ? pathname === href : pathname.startsWith(href));
   const current = [...groups.flatMap((group) => group.links), SETTINGS].find(({ href }) => isActive(href));
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const refresh = () => getUnreadCount().then(setUnread).catch(() => {});
+    refresh();
+    window.addEventListener(MESSAGES_CHANGED, refresh);
+    return () => window.removeEventListener(MESSAGES_CHANGED, refresh);
+  }, [isAdmin, pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -118,7 +136,7 @@ export default function AdminLayout({ children }) {
       </header>
 
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sky/15 bg-navy-panel/70 backdrop-blur lg:block">
-        <Sidebar groups={groups} isAdmin={isAdmin} isActive={isActive} activeId="sidebar-active" />
+        <Sidebar groups={groups} isAdmin={isAdmin} isActive={isActive} activeId="sidebar-active" unread={unread} />
       </aside>
 
       <AnimatePresence>
@@ -131,6 +149,7 @@ export default function AdminLayout({ children }) {
                 isAdmin={isAdmin}
                 isActive={isActive}
                 activeId="drawer-active"
+                unread={unread}
                 onNavigate={() => setMenuOpen(false)}
                 closeButton={
                   <button ref={closeRef} type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="flex h-11 w-11 items-center justify-center rounded-xl border border-sky/30 text-2xl">
