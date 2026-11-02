@@ -16,13 +16,28 @@ export async function signUp({ name, email, phoneNumber, password }) {
   }
 }
 
+export async function resendSignUpCode(email) {
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: `${window.location.origin}/logIn` },
+  });
+  if (error) {
+    throw new Error(
+      error.status === 429
+        ? "Please wait a little before asking for another code."
+        : "Could not send a new code. Please try again."
+    );
+  }
+}
+
 export async function verifyCode({ email, code }) {
   const { error } = await supabase.auth.verifyOtp({
     email,
     token: code,
     type: "signup",
   });
-  if (error) throw new Error("Incorrect verification code");
+  if (error) throw new Error("That code is incorrect or expired. Use the newest code you received.");
   // The original flow sends users to the log in page after verifying.
   await supabase.auth.signOut();
 }

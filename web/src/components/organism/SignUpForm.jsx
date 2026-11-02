@@ -1,11 +1,48 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Formik, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { signUp, verifyCode } from "@/api/auth";
+import { resendSignUpCode, signUp, verifyCode } from "@/api/auth";
 import { toast } from 'react-toastify';
 import { useRouter } from "next/navigation";
+
+const RESEND_WAIT_SECONDS = 60;
+
+function CodeHelp({ email }) {
+  const [secondsLeft, setSecondsLeft] = useState(RESEND_WAIT_SECONDS);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const timer = setTimeout(() => setSecondsLeft((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft]);
+
+  const handleResend = async () => {
+    setSending(true);
+    try {
+      await resendSignUpCode(email);
+      setSecondsLeft(RESEND_WAIT_SECONDS);
+      toast.success('New code sent. Use the newest one, as older codes stop working.');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-xl border border-sky/20 bg-white/5 p-4">
+      <p className="font-display text-lg font-semibold text-sky">Check Your Email</p>
+      <p className="mt-1 break-words text-sm leading-relaxed text-white/80">We sent a code to <span className="font-semibold text-white">{email}</span>. It can take a few minutes to arrive.</p>
+      <p className="mt-2 text-sm leading-relaxed text-white/80">Can't find it? Check your Junk folder. University emails often filter messages there or to Quarantine.</p>
+      <button type="button" onClick={handleResend} disabled={sending || secondsLeft > 0} aria-live="polite" className="btn btn-ghost mt-4 !min-h-11 w-full !py-2 text-sm disabled:cursor-not-allowed disabled:opacity-60 md:w-auto">
+        {sending ? 'Sending...' : secondsLeft > 0 ? `Resend Code in ${secondsLeft}s` : 'Resend Code'}
+      </button>
+    </div>
+  );
+}
 
 const SignUpForm = () => {
   const [isVerificationStep, setIsVerificationStep] = useState(false);
@@ -169,11 +206,13 @@ const SignUpForm = () => {
                 <input
                   id="verificationCode"
                   type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   {...getFieldProps('verificationCode')}
                   className="field"
                 />
                 <ErrorMessage name="verificationCode" component="div" className="field-error" />
-                <p className="mt-4 font-display text-lg font-semibold text-sky">Check Your Email</p>
+                <CodeHelp email={email} />
               </div>
             </>
           )}
