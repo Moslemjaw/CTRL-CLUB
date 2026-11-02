@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import BrandMark from "@/components/brand/BrandMark";
 import { coverImageUrl } from "@/api/events";
 
 function formatDate(dateString) {
@@ -33,7 +34,11 @@ function EventCard({ image, id, title, description, date, location, availableTic
       <div className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" style={{ background: "radial-gradient(22rem circle at var(--mx) var(--my), rgba(111,203,255,0.13), transparent 70%)" }} />
       <div className="relative grid 2md:grid-cols-[minmax(0,1.05fr)_minmax(0,1.5fr)_15rem]">
         <div className="relative aspect-[16/10] overflow-hidden 2md:aspect-auto 2md:min-h-72">
-          <img src={coverImageUrl(image)} alt={title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
+          {image ? (
+            <img src={coverImageUrl(image)} alt={title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-navy-lift/40"><BrandMark /></div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-navy-panel/70 to-transparent 2md:bg-gradient-to-r 2md:from-transparent 2md:to-navy-panel/50" />
         </div>
 
