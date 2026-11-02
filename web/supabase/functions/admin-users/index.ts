@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 const ROLES = ["user", "admin", "scanner", "ctrl_member"];
+const TITLED_ROLES = ["admin", "ctrl_member"];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -64,9 +65,22 @@ Deno.serve(async (req) => {
     if (body.action === "set-role") {
       if (body.userId === user.id) return json({ message: "You cannot change your own role" }, 400);
       if (!ROLES.includes(body.role)) return json({ message: "Invalid user role" }, 400);
-      const { error } = await admin.from("profiles").update({ role: body.role }).eq("id", body.userId);
+      // Titles are only for admins and members, so other roles lose theirs.
+      const changes = TITLED_ROLES.includes(body.role) ? { role: body.role } : { role: body.role, title: null };
+      const { error } = await admin.from("profiles").update(changes).eq("id", body.userId);
       if (error) return json({ message: error.message }, 400);
       return json({ message: "Role updated successfully" });
+    }
+
+    if (body.action === "set-title") {
+      const title = String(body.title ?? "").trim();
+      if (title.length > 60) return json({ message: "Keep the title to 60 characters or fewer" }, 400);
+      const { data: target } = await admin.from("profiles").select("role").eq("id", body.userId).maybeSingle();
+      if (!target) return json({ message: "User not found" }, 404);
+      if (!TITLED_ROLES.includes(target.role)) return json({ message: "Only admins and CTRL members can have a title" }, 400);
+      const { error } = await admin.from("profiles").update({ title: title || null }).eq("id", body.userId);
+      if (error) return json({ message: error.message }, 400);
+      return json({ message: title ? "Title updated" : "Title removed" });
     }
 
     if (body.action === "delete") {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { MdEmojiEvents, MdOutlineAddToPhotos } from "react-icons/md";
-import { IoClose, IoLogOut, IoMenu, IoSettingsSharp } from "react-icons/io5";
+import { IoClose, IoLogOut, IoMenu, IoPersonCircleOutline } from "react-icons/io5";
 import { BiSolidDashboard } from "react-icons/bi";
 import { BsCalendar3, BsEnvelope, BsJournalText, BsKanban, BsPencilSquare, BsQrCodeScan } from "react-icons/bs";
 import { FaHome } from "react-icons/fa";
@@ -14,6 +14,7 @@ import BrandMark from "@/components/brand/BrandMark";
 import { useAuth } from "@/components/AuthProvider";
 import { logOut } from "@/api/auth";
 import { getUnreadCount, MESSAGES_CHANGED } from "@/api/messages";
+import { ProfileAvatar } from "./EditProfile";
 
 const OVERVIEW = {
   links: [
@@ -21,30 +22,35 @@ const OVERVIEW = {
     { href: "/admin/messages", label: "Messages", icon: <BsEnvelope /> },
   ],
 };
-const WORKSPACE = {
-  title: "Workspace",
-  links: [
-    { href: "/workspace/tasks", label: "Tasks", icon: <BsKanban /> },
-    { href: "/workspace/calendar", label: "Calendar", icon: <BsCalendar3 /> },
-    { href: "/workspace/notes", label: "Notes", icon: <BsJournalText /> },
-    { href: "/qrScanner", label: "QR Scanner", icon: <BsQrCodeScan /> },
-  ],
-};
-const MANAGE = {
-  title: "Manage",
+const QR_SCANNER = { href: "/qrScanner", label: "QR Scanner", icon: <BsQrCodeScan /> };
+const EVENTS = {
+  title: "Events",
   links: [
     { href: "/admin/allEvents", label: "All Events", icon: <MdEmojiEvents /> },
     { href: "/admin/addEvent", label: "Add Event", icon: <MdOutlineAddToPhotos /> },
+    QR_SCANNER,
+  ],
+};
+const WORKSPACE_LINKS = [
+  { href: "/workspace/tasks", label: "Tasks", icon: <BsKanban /> },
+  { href: "/workspace/calendar", label: "Calendar", icon: <BsCalendar3 /> },
+  { href: "/workspace/notes", label: "Notes", icon: <BsJournalText /> },
+];
+const WORKSPACE = { title: "Workspace", links: WORKSPACE_LINKS };
+const MEMBER_WORKSPACE = { title: "Workspace", links: [...WORKSPACE_LINKS, QR_SCANNER] };
+const CONTENT = {
+  title: "Manage",
+  links: [
     { href: "/admin/blogs", label: "Blogs", icon: <BsPencilSquare /> },
     { href: "/admin/addUser", label: "Add User", icon: <IoMdPersonAdd /> },
   ],
 };
-const SETTINGS = { href: "/admin/settings", label: "Settings", icon: <IoSettingsSharp /> };
+const PROFILE = { href: "/workspace/profile", label: "Profile", icon: <IoPersonCircleOutline /> };
 
 const rowClass = "flex min-h-11 w-full items-center gap-3 lg:min-h-10 rounded-xl px-3 font-display font-semibold text-white/75 transition-colors hover:bg-white/5 hover:text-white";
 
-function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton, unread }) {
-  const { userData } = useAuth();
+function Sidebar({ groups, isActive, activeId, onNavigate, closeButton, unread }) {
+  const { userData, role } = useAuth();
 
   const renderLink = ({ href, label, icon }) => (
     <Link key={href} href={href} onClick={onNavigate} aria-current={isActive(href) ? "page" : undefined} className={`relative ${rowClass} ${isActive(href) ? "!text-ink hover:!bg-transparent" : ""}`}>
@@ -63,13 +69,13 @@ function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton,
         <Link href="/" aria-label="CTRL home" onClick={onNavigate}><BrandMark /></Link>
         {closeButton}
       </div>
-      <div className="flex items-center gap-3 rounded-xl bg-white/5 p-2.5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white font-display text-lg font-bold text-ink shadow-[0_3px_0_#6FCBFF]">{userData?.name?.[0]?.toUpperCase()}</span>
+      <Link href={PROFILE.href} onClick={onNavigate} aria-label="Open your profile" className="flex items-center gap-3 rounded-xl bg-white/5 p-2.5 transition-colors hover:bg-white/10">
+        <ProfileAvatar userData={userData} className="h-10 w-10 text-lg" />
         <div className="min-w-0">
           <p className="truncate font-display font-semibold">{userData?.name}</p>
-          <p className="font-mono text-xs uppercase tracking-[0.14em] text-sky">{isAdmin ? "Admin" : "CTRL Member"}</p>
+          <p className="truncate font-mono text-xs uppercase tracking-[0.14em] text-sky">{userData?.title || (role === "admin" ? "Admin" : "CTRL Member")}</p>
         </div>
-      </div>
+      </Link>
       <nav aria-label="Dashboard Links" className="flex flex-col gap-3">
         {groups.map((group, index) => (
           <div key={group.title ?? index} className="flex flex-col gap-0.5">
@@ -79,7 +85,7 @@ function Sidebar({ groups, isAdmin, isActive, activeId, onNavigate, closeButton,
         ))}
       </nav>
       <div className="mt-auto flex flex-col gap-0.5 border-t border-sky/15 pt-2">
-        {isAdmin && renderLink(SETTINGS)}
+        {renderLink(PROFILE)}
         <Link href="/" onClick={onNavigate} className={rowClass}>
           <span className="text-lg" aria-hidden="true"><FaHome /></span>Back to Site
         </Link>
@@ -98,9 +104,9 @@ export default function AdminLayout({ children }) {
   const [unread, setUnread] = useState(0);
   const closeRef = useRef(null);
   const isAdmin = role === "admin";
-  const groups = isAdmin ? [OVERVIEW, WORKSPACE, MANAGE] : [WORKSPACE];
+  const groups = isAdmin ? [OVERVIEW, EVENTS, WORKSPACE, CONTENT] : [MEMBER_WORKSPACE];
   const isActive = (href) => (href === "/admin" ? pathname === href : pathname.startsWith(href));
-  const current = [...groups.flatMap((group) => group.links), SETTINGS].find(({ href }) => isActive(href));
+  const current = [...groups.flatMap((group) => group.links), PROFILE].find(({ href }) => isActive(href));
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -136,7 +142,7 @@ export default function AdminLayout({ children }) {
       </header>
 
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sky/15 bg-navy-panel/70 backdrop-blur lg:block">
-        <Sidebar groups={groups} isAdmin={isAdmin} isActive={isActive} activeId="sidebar-active" unread={unread} />
+        <Sidebar groups={groups} isActive={isActive} activeId="sidebar-active" unread={unread} />
       </aside>
 
       <AnimatePresence>
@@ -146,7 +152,7 @@ export default function AdminLayout({ children }) {
             <motion.div initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }} className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-sky/15 bg-navy-panel">
               <Sidebar
                 groups={groups}
-                isAdmin={isAdmin}
+               
                 isActive={isActive}
                 activeId="drawer-active"
                 unread={unread}

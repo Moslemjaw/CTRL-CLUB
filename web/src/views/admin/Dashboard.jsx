@@ -7,7 +7,7 @@ import DashboardCard from "@/components/atoms/DashboardCard";
 import PageHeader from "@/components/molecule/PageHeader";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
 import { useAuth } from "@/components/AuthProvider";
-import { deleteUser, getAllUsers, getCountUsers, setUserRole } from "@/api/users";
+import { deleteUser, getAllUsers, getCountUsers, setUserRole, setUserTitle } from "@/api/users";
 import { getCountEvents } from "@/api/events";
 import { getCountTickets } from "@/api/tickets";
 
@@ -18,10 +18,43 @@ const ROLES = [
   { value: "scanner", label: "Scanner" },
   { value: "ctrl_member", label: "CTRL Member" },
 ];
-const USER_COLUMNS = "2md:grid-cols-[minmax(0,1fr)_8.5rem_10.5rem_4.5rem] 2md:gap-4";
+const USER_COLUMNS = "2md:grid-cols-[minmax(0,1fr)_7.5rem_9.5rem_11rem_3.5rem] 2md:gap-3";
+const TITLED_ROLES = ["admin", "ctrl_member"];
+
+function TitleInput({ user, onSave }) {
+  const [value, setValue] = useState(user.title ?? "");
+
+  useEffect(() => setValue(user.title ?? ""), [user.title]);
+
+  const save = () => {
+    const title = value.trim();
+    setValue(title);
+    if (title !== (user.title ?? "")) onSave(user.id, title);
+  };
+
+  if (!TITLED_ROLES.includes(user.role)) {
+    return <p className="text-white/40"><span className="2md:hidden">Title: </span>Not available</p>;
+  }
+
+  return (
+    <input
+      type="text"
+      aria-label={`Title for ${user.name}`}
+      placeholder="e.g. President"
+      maxLength={60}
+      value={value}
+      onChange={(event) => setValue(event.target.value)}
+      onBlur={save}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") event.currentTarget.blur();
+      }}
+      className="field !min-h-10 !py-2 text-sm"
+    />
+  );
+}
 
 export default function Dashboard() {
-  const { userData } = useAuth();
+  const { userData, refreshProfile } = useAuth();
   const [usersData, setUsersData] = useState([]);
   const [usersCount, setUsersCount] = useState(0);
   const [eventsCount, setEventsCount] = useState(0);
@@ -56,10 +89,21 @@ export default function Dashboard() {
     }
   };
 
+  const handleTitleChange = async (userId, title) => {
+    try {
+      const response = await setUserTitle(userId, title);
+      setUsersData((previous) => previous.map((user) => (user.id === userId ? { ...user, title } : user)));
+      if (userId === userData?.id) await refreshProfile();
+      toast.success(response.message);
+    } catch (error) {
+      toast.error(error.message || "An error occurred");
+    }
+  };
+
   const handleRoleChange = async (userId, role) => {
     try {
       const response = await setUserRole(userId, role);
-      setUsersData((previous) => previous.map((user) => (user.id === userId ? { ...user, role } : user)));
+      setUsersData((previous) => previous.map((user) => (user.id === userId ? { ...user, role, title: TITLED_ROLES.includes(role) ? user.title : null } : user)));
       toast.success(response.message);
     } catch (error) {
       toast.error(error.message || "An error occurred");
@@ -85,6 +129,7 @@ export default function Dashboard() {
           <span>User</span>
           <span>Phone Number</span>
           <span>Role</span>
+          <span>Title</span>
           <span />
         </div>
         {usersData.length > 0 ? (
@@ -110,6 +155,7 @@ export default function Dashboard() {
                     ))}
                   </select>
                 )}
+                <TitleInput user={user} onSave={handleTitleChange} />
                 <div className="2md:text-right">
                   {user.id !== userData?.id && (
                     <button
