@@ -26,7 +26,22 @@ const toNote = (row) => ({
   body: row.body,
   updatedAt: row.updated_at,
   createdBy: row.created_by,
+  visibility: row.visibility,
+  sharedWith: (row.note_shares ?? []).map((share) => share.user_id),
+  attachments: (row.note_attachments ?? [])
+    .map((file) => ({
+      id: file.id,
+      name: file.name,
+      path: file.path,
+      size: file.size_bytes,
+      uploadedBy: file.uploaded_by,
+      createdAt: file.created_at,
+    }))
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
 });
+
+const NOTE_COLUMNS = "*, note_shares(user_id), note_attachments(id, name, path, size_bytes, uploaded_by, created_at)";
+const NOTE_FILES = "note-attachments";
 
 export async function getTeamMembers() {
   const { data, error } = await supabase.rpc("list_team_members");
@@ -123,22 +138,73 @@ export const deleteCalendarEntry = (id) => removeRow("calendar_entries", id);
 export async function getNotes() {
   const { data, error } = await supabase
     .from("notes")
-    .select("*")
+    .select(NOTE_COLUMNS)
     .order("updated_at", { ascending: false });
   if (error) throw error;
   return data.map(toNote);
 }
 
-export async function createNote({ title, body }) {
-  const { data, error } = await supabase.from("notes").insert({ title, body }).select().single();
+export async function getNote(id) {
+  const { data, error } = await supabase.from("notes").select(NOTE_COLUMNS).eq("id", id).single();
   if (error) throw error;
   return toNote(data);
 }
 
-export async function updateNote(id, { title, body }) {
-  const { data, error } = await supabase.from("notes").update({ title, body }).eq("id", id).select().single();
+export async function createNote({ title, body, visibility }) {
+  const { data, error } = await supabase.from("notes").insert({ title, body, visibility }).select("id").single();
   if (error) throw error;
-  return toNote(data);
+  return data.id;
 }
 
-export const deleteNote = (id) => removeRow("notes", id);
+// Only the author may send a visibility; the database rejects it from anyone else.
+export async function updateNote(id, { title, body, visibility }) {
+  const changes = visibility ? { title, body, visibility } : { title, body };
+  const { error } = await supabase.from("notes").update(changes).eq("id", id);
+  if (error) throw error;
+}
+
+export async function setNoteShares(noteId, userIds) {
+  const { error } = await supabase.rpc("set_note_shares", { p_note_id: noteId, p_user_ids: userIds });
+  if (error) throw error;
+}
+
+export async function addNoteAttachment(noteId, file) {
+  const path = `${noteId}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+  const { error: uploadError } = await supabase.storage.from(NOTE_FILES).upload(path, file);
+  if (uploadError) throw uploadError;
+  const { error } = await supabase.from("note_attachments").insert({
+    note_id: noteId,
+    name: file.name.slice(0, 255),
+    path,
+    size_bytes: file.size,
+    mime_type: file.type,
+  });
+  if (error) {
+    await supabase.storage.from(NOTE_FILES).remove([path]);
+    throw error;
+  }
+}
+
+export async function removeNoteAttachment(attachment) {
+  const { error: storageError } = await supabase.storage.from(NOTE_FILES).remove([attachment.path]);
+  if (storageError) throw storageError;
+  await removeRow("note_attachments", attachment.id);
+}
+
+// Links last one minute and download the file under its original name.
+export async function getAttachmentLink(attachment) {
+  const { data, error } = await supabase.storage
+    .from(NOTE_FILES)
+    .createSignedUrl(attachment.path, 60, { download: attachment.name });
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+// Files are removed first, because the access rules stop allowing it once the note is gone.
+export async function deleteNote(note) {
+  if (note.attachments.length) {
+    const { error } = await supabase.storage.from(NOTE_FILES).remove(note.attachments.map((file) => file.path));
+    if (error) throw error;
+  }
+  await removeRow("notes", note.id);
+}
