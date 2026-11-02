@@ -38,3 +38,7 @@ Project ref: `ztnorzbajrebenknhxge`. The schema, access rules and Edge Functions
 ## Deploy to Vercel
 
 Import the repository, set the root directory to `web`, and add the two variables from `.env.example`.
+
+## PWA
+
+The site installs as an app (`src/app/manifest.js`). The service worker (`public/sw.js`) runs only in production builds. It caches build assets and the offline page, never pages or Supabase responses, and each deploy replaces it automatically. To test it, use `npm run build` and `npm start`.
