@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { IoSearch } from "react-icons/io5";
 import DashboardCard from "@/components/atoms/DashboardCard";
 import PageHeader from "@/components/molecule/PageHeader";
 import PaginationRounded from "@/components/molecule/PaginationRounded";
@@ -18,7 +19,8 @@ const ROLES = [
   { value: "scanner", label: "Scanner" },
   { value: "ctrl_member", label: "CTRL Member" },
 ];
-const USER_COLUMNS = "2md:grid-cols-[minmax(0,1fr)_7.5rem_9.5rem_11rem_3.5rem] 2md:gap-3";
+const USER_COLUMNS = "2md:grid-cols-[minmax(0,1fr)_7rem_9rem_14rem_3.5rem] 2md:gap-3";
+const SEARCH_DELAY_MS = 300;
 const TITLED_ROLES = ["admin", "ctrl_member"];
 
 function TitleInput({ user, onSave }) {
@@ -60,6 +62,11 @@ export default function Dashboard() {
   const [eventsCount, setEventsCount] = useState(0);
   const [ticketsCount, setTicketsCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [matchCount, setMatchCount] = useState(0);
+  const [usersLoaded, setUsersLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([getCountUsers(), getCountEvents(), getCountTickets()])
@@ -72,10 +79,34 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    getAllUsers(currentPage)
-      .then(setUsersData)
-      .catch((error) => toast.error(`Error fetching users data: ${error.message}`));
-  }, [currentPage]);
+    const timer = setTimeout(() => {
+      setSearch(searchText);
+      setCurrentPage(1);
+    }, SEARCH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [searchText]);
+
+  useEffect(() => {
+    let active = true;
+    getAllUsers(currentPage, { search, role: roleFilter })
+      .then(({ users, count }) => {
+        if (!active) return;
+        setUsersData(users);
+        setMatchCount(count);
+      })
+      .catch((error) => toast.error(`Error fetching users data: ${error.message}`))
+      .finally(() => {
+        if (active) setUsersLoaded(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [currentPage, search, roleFilter]);
+
+  const handleRoleFilterChange = (event) => {
+    setRoleFilter(event.target.value);
+    setCurrentPage(1);
+  };
 
   const handleDelete = async (userId) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
@@ -83,6 +114,7 @@ export default function Dashboard() {
       const response = await deleteUser(userId);
       setUsersData((previous) => previous.filter((user) => user.id !== userId));
       setUsersCount((previous) => previous - 1);
+      setMatchCount((previous) => previous - 1);
       toast.success(response.message);
     } catch (error) {
       toast.error(error.message || "An error occurred");
@@ -125,6 +157,26 @@ export default function Dashboard() {
 
       <section className="panel" aria-labelledby="users-heading">
         <h2 id="users-heading" className="heading mb-5 text-2xl">Users</h2>
+        <div className="mb-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_13rem]">
+          <div className="relative">
+            <IoSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-sky" aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Search users"
+              placeholder="Search by name, phone or email"
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              className="field !pl-11"
+            />
+          </div>
+          <select aria-label="Filter by role" value={roleFilter} onChange={handleRoleFilterChange} className="field">
+            <option value="all">All Roles</option>
+            {ROLES.map((role) => (
+              <option key={role.value} value={role.value}>{role.label}</option>
+            ))}
+          </select>
+        </div>
+        <p className="mb-3 font-mono text-xs text-white/60" role="status">{usersLoaded ? `Showing ${matchCount} of ${usersCount} users` : "Loading users..."}</p>
         <div className={`hidden border-b border-sky/20 px-3 pb-3 font-mono text-xs uppercase tracking-[0.12em] text-sky 2md:grid ${USER_COLUMNS}`} aria-hidden="true">
           <span>User</span>
           <span>Phone Number</span>
@@ -172,12 +224,12 @@ export default function Dashboard() {
             ))}
           </ul>
         ) : (
-          <p className="py-4 text-center text-white/60">No users found.</p>
+          <p className="py-10 text-center text-white/60">{usersLoaded ? "No users match your search." : ""}</p>
         )}
         {usersData.length > 0 && (
           <div className="mx-auto">
             <PaginationRounded
-              count={Math.ceil(usersCount / ITEMS_PER_PAGE)}
+              count={Math.ceil(matchCount / ITEMS_PER_PAGE)}
               page={currentPage}
               onChange={(_event, value) => setCurrentPage(value)}
             />

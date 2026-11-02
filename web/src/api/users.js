@@ -3,15 +3,26 @@ import { invokeFunction, supabase } from "@/lib/supabase";
 const PAGE_SIZE = 6;
 const AVATARS = "avatars";
 
-export async function getAllUsers(page) {
+// Quoted so commas and brackets in the search text can't change the filter.
+const searchTerm = (text) => `"%${text.replace(/[\\"]/g, (char) => `\\${char}`)}%"`;
+
+export async function getAllUsers(page, { search = "", role = "all" } = {}) {
   const from = (page - 1) * PAGE_SIZE;
-  const { data, error } = await supabase
+  let query = supabase
     .from("profiles")
-    .select("id, name, email, phone_number, role, title")
+    .select("id, name, email, phone_number, role, title", { count: "exact" });
+  if (role !== "all") query = query.eq("role", role);
+  const text = search.trim();
+  if (text) {
+    // Phone numbers are stored as digits, so spaces and dashes in the search are ignored for them.
+    const phone = text.replace(/[\s()-]/g, "") || text;
+    query = query.or(`name.ilike.${searchTerm(text)},email.ilike.${searchTerm(text)},phone_number.ilike.${searchTerm(phone)}`);
+  }
+  const { data, count, error } = await query
     .order("created_at", { ascending: true })
     .range(from, from + PAGE_SIZE - 1);
   if (error) throw error;
-  return data.map((row) => ({
+  const users = data.map((row) => ({
     id: row.id,
     name: row.name,
     email: row.email,
@@ -19,6 +30,7 @@ export async function getAllUsers(page) {
     role: row.role,
     title: row.title,
   }));
+  return { users, count };
 }
 
 export async function getCountUsers() {
