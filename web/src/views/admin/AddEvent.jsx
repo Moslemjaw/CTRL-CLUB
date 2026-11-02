@@ -36,7 +36,10 @@ const AddEvent = () => {
     validationSchema: Yup.object({
       coverImage: Yup.mixed().required('Event cover image is required'),
       title: Yup.string().required('Event title is required'),
-      price: Yup.number().required('Price is required').typeError('Price must be a number'),
+      price: Yup.number()
+        .transform((value, original) => (String(original ?? '').trim() === '' ? undefined : value))
+        .typeError('Price must be a number')
+        .min(0, 'Price cannot be negative'),
       date: Yup.date().required('Date is required').typeError('Date must be a valid date'),
       description: Yup.string().required('Description is required'),
       location: Yup.string().required('Location is required'),
@@ -119,7 +122,7 @@ const AddEvent = () => {
           <input
             type="text"
             name="price"
-            placeholder="Event Price"
+            placeholder="Event Price (leave empty if free)"
             value={formik.values.price}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}

@@ -18,6 +18,9 @@ const toEvent = (row) => ({
   coverImage: row.cover_image,
 });
 
+// An empty price means the event is free.
+const toPrice = (value) => (String(value ?? "").trim() === "" ? 0 : Number(value));
+
 const applyFilter = (query, filter) => {
   if (filter === "open") return query.gt("available_tickets", 0);
   if (filter === "closed") return query.eq("available_tickets", 0);
@@ -92,7 +95,7 @@ export async function createEvent(values) {
     description: values.description,
     date: new Date(values.date).toISOString(),
     location: values.location,
-    price: values.price,
+    price: toPrice(values.price),
     capacity: values.capacity,
     available_tickets: values.capacity,
     cover_image: coverImage,
@@ -116,7 +119,7 @@ export async function updateEvent(id, values, previousImage) {
       description: values.description,
       date: new Date(values.date).toISOString(),
       location: values.location,
-      price: values.price,
+      price: toPrice(values.price),
       capacity: values.capacity,
       available_tickets: values.availableTickets,
       cover_image: coverImage,
